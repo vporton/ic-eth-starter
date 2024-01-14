@@ -1,3 +1,4 @@
 [dependencies]
 base = "0.9.3"
 sequence = "https://github.com/matthewhammer/motoko-sequence#366c419"
+"json.mo" = "https://github.com/aviate-labs/json.mo#master@afd30ed75095cb339c1ec187d61030bbd2e59ae6"
