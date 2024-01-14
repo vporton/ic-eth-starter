@@ -34,7 +34,7 @@ function App() {
           <p>Your identity score:{' '}
             {score === undefined ? 'Click the above button to check.'
               : `${score} ${score >= 20 ? '(Congratulations: You\'ve been verified.)'
-                : '(Sorry: it\'s <20, you are considered a bot.)'}`}
+                : '(Sorry: It\'s <20, you are considered a bot.)'}`}
           </p>
         </Row>
       </Container>
