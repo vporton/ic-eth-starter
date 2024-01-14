@@ -1,4 +1,6 @@
-# IC 🔗 ETH (Beta)
+# DFINITY ICP Gitcoin Passport Client
+
+_This software is untested. Use at your own risk._
 
 > #### Interact with the [Ethereum](https://ethereum.org/) blockchain from the [Internet Computer](https://internetcomputer.org/).
 
