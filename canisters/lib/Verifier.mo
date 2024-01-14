@@ -87,7 +87,7 @@ module {
                     };
                     for (e in item.vals()) {
                         if (e.0 == "address") {
-                            let #String address = e.1 else {
+                            let #String address = e.1 else { // FIXME: It may be null.
                                 break b null;
                             };
                             break b (?address);
