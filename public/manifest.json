@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "Example Identity App",
+  "name": "Example Identity App for DFINITY Internet Computer",
   "icons": [
     {
       "src": "favicon.ico",
