@@ -16,7 +16,8 @@ const walletConnectOptions/*: WalletConnectOptions*/ = {
   projectId:
     (process.env.REACT_APP_WALLET_CONNECT_PROJECT_ID as string) ||
     "default-project-id",
-  };
+  dappUrl: "http://localhost:3000/", // TODO
+};
  
 const blockNativeApiKey = process.env.REACT_APP_BLOCKNATIVE_KEY as string;
 
