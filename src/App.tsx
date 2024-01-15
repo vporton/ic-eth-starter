@@ -100,9 +100,11 @@ function App() {
             <a target='_blank' href="https://passport.gitcoin.co" rel="noreferrer">Gitcoin Passport</a>{' '}
             to prove user's personhood (against so called <q>Sybil attack</q>, that is when
             a user votes more than once).</p>
-          <p>The current version of this app requires use of an Ethereum wallet (So, in real Internet Computer apps
-            you will need two wallets: DFINITY Internet Computer wallet and Ethereum wallet.) that you need
-            both in Gitcoin Passport and in this app.{' '}
+          <p>The current version of this app requires use of an Ethereum wallet that you need
+            both in Gitcoin Passport and in this app. (So, in real Internet Computer apps
+            you will need two wallets: DFINITY Internet Computer wallet and Ethereum wallet.){' '}
+            You don't need to have any funds on your wallet to use this app (because you will use an Ethereum wallet{' '}
+            only to sign a message for this app, not for any transactions).
             In the future <a target='_blank' href="https://portonvictor.org" rel="noreferrer">I</a> am going to
             add DFINITY Internet Computer support to Gitcoin Passport, to avoid the need to create an Ethereum wallet
             to verify personhood in apps like this.</p>
