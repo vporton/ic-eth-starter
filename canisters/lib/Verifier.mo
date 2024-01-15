@@ -36,18 +36,12 @@ module {
         result;
     };
 
-    public func encodeEthAddress(address: EthereumAddress): Text {
-        "0x" # encodeHex(address);
-    };
-
     /// Remember to add cycles for the HTTP request.
     public func scoreByEthereumAddress(
-        address: EthereumAddress,
+        address: Text,
         scorerId: Nat,
         transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload,
     ): async* Float {
-        let encodedAddress = encodeEthAddress(address);
-
         let ic : Types.IC = actor ("aaaaa-aa"); // management canister
 
         let request : Types.HttpRequestArgs = {
@@ -55,7 +49,7 @@ module {
             headers = []; // FIXME: API KEY
             max_response_bytes = ?10000;
             method = #get;
-            url = "https://api.scorer.gitcoin.co/registry/score/" # Nat.toText(scorerId) # "/" # encodedAddress;
+            url = "https://api.scorer.gitcoin.co/registry/score/" # Nat.toText(scorerId) # "/" # address; // TODO: Configurable URL
             transform = ?{
                 function = transform;
                 context = Blob.fromArray([]);
@@ -105,14 +99,13 @@ module {
     // TODO: Signature - text or blob?
     /// Remember to add cycles for the HTTP request.
     public func scoreBySignedEthereumAddress(
-        address: EthereumAddress,
+        address: Text,
         signature: Text,
         scorerId: Nat,
         transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload,
     ): async* Float {
-        let encodedAddress = encodeEthAddress(address);
-        let message = "I certify that I am the owner of the Ethereum account\n" # encodedAddress;
-        if (not(await ic_eth.verify_ecdsa(encodedAddress, message, signature))) {
+        let message = "I certify that I am the owner of the Ethereum account\n" # address;
+        if (not(await ic_eth.verify_ecdsa(address, message, signature))) {
             Debug.trap("You are not the owner of the Ethereum account");
         };
         await* scoreByEthereumAddress(address, scorerId, transform);

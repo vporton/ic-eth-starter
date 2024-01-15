@@ -89,7 +89,7 @@ function App() {
     ethersProvider = new ethers.BrowserProvider(wallet.provider, 'any')
     // ethersProvider = new ethers.providers.Web3Provider(wallet.provider, 'any')
   }
-  
+
   async function readScore() {
     connect().then(async () => {
       const signer = await ethersProvider.getSigner();
