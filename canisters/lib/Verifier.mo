@@ -111,7 +111,7 @@ module {
         transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload,
     ): async* Float {
         let encodedAddress = encodeEthAddress(address);
-        let message = "I certify that I am the owner of the Etheretum account\n" # encodedAddress;
+        let message = "I certify that I am the owner of the Ethereum account\n" # encodedAddress;
         if (not(await ic_eth.verify_ecdsa(encodedAddress, message, signature))) {
             Debug.trap("You are not the owner of the Ethereum account");
         };
