@@ -97,7 +97,7 @@ function App() {
             {connecting ? 'connecting' : wallet ? 'Disconnect Ethereum' : 'Connect Ethereum'}
           </Button>
           <p>This is an example app for DFINITY Internet Computer, that connects to{' '}
-            <a target='_blank' href="https://passport.gitcoin.co/" rel="noreferrer">Gitcoin Passport</a>{' '}
+            <a target='_blank' href="https://passport.gitcoin.co" rel="noreferrer">Gitcoin Passport</a>{' '}
             to prove user's personhood (against so called <q>Sybil attack</q>, that is when
             a user votes more than once).</p>
           <p>The current version of this app requires use of an Ethereum wallet (So, in real Internet Computer apps
@@ -108,7 +108,7 @@ function App() {
             to verify personhood in apps like this.</p>
           <h2>Steps</h2>
           <ol>
-            <li>Go to <a target='_blank' href="https://passport.gitcoin.co/" rel="noreferrer">Gitcoin Passport</a>{' '}
+            <li>Go to <a target='_blank' href="https://passport.gitcoin.co" rel="noreferrer">Gitcoin Passport</a>{' '}
               and prove your personhood.</li>
             <li>Return to this app and check that it works with the same Ethereum wallet:<br/>
               <Button>Check your identity score</Button>
