@@ -11,6 +11,8 @@ import injectedModule from '@web3-onboard/injected-wallets'
 import { ethers } from 'ethers'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
+import { scoreSignature } from 'passport_client_dfinity-client';
+import { backend } from './declarations/backend'
 
 const walletConnectOptions/*: WalletConnectOptions*/ = {
   projectId:
@@ -80,7 +82,7 @@ function App() {
   const [{ wallet, connecting }, connect, disconnect] = useConnectWallet()
 
   // create an ethers provider
-  let ethersProvider
+  let ethersProvider: ethers.Provider;
 
   if (wallet) {
     // if using ethers v6 this is:
@@ -88,6 +90,14 @@ function App() {
     // ethersProvider = new ethers.providers.Web3Provider(wallet.provider, 'any')
   }
   
+  async function readScore() {
+    connect();
+    const signer = await (ethersProvider as any).getSigner();
+    const { address, signature } = await scoreSignature(signer);
+    const score = await backend.scoreBySignedEthereumAddress(address, signature);
+    setScore(score);
+  }
+
   return (
     <div className="App">
       <Container>
@@ -113,7 +123,7 @@ function App() {
             <li>Go to <a target='_blank' href="https://passport.gitcoin.co" rel="noreferrer">Gitcoin Passport</a>{' '}
               and prove your personhood.</li>
             <li>Return to this app and check that it works with the same Ethereum wallet:<br/>
-              <Button>Check your identity score</Button>
+              <Button onClick={readScore}>Check your identity score</Button>
             </li>
           </ol>
           <p>Your identity score:{' '}
