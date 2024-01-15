@@ -94,7 +94,7 @@ function App() {
     connect().then(async () => {
       const signer = await ethersProvider.getSigner();
       const { address, signature } = await scoreSignature(signer);
-      const score = await backend.scoreBySignedEthereumAddress(address, signature);
+      const score = await backend.scoreBySignedEthereumAddress({address, signature});
       setScore(score);
     });
   }

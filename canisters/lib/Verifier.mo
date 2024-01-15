@@ -37,11 +37,11 @@ module {
     };
 
     /// Remember to add cycles for the HTTP request.
-    public func scoreByEthereumAddress(
-        address: Text,
-        scorerId: Nat,
-        transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload,
-    ): async* Float {
+    public func scoreByEthereumAddress({
+        address: Text;
+        scorerId: Nat;
+        transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload;
+    }): async* Float {
         let ic : Types.IC = actor ("aaaaa-aa"); // management canister
 
         let request : Types.HttpRequestArgs = {
@@ -98,17 +98,17 @@ module {
 
     // TODO: Signature - text or blob?
     /// Remember to add cycles for the HTTP request.
-    public func scoreBySignedEthereumAddress(
-        address: Text,
-        signature: Text,
-        scorerId: Nat,
-        transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload,
-    ): async* Float {
+    public func scoreBySignedEthereumAddress({
+        address: Text;
+        signature: Text;
+        scorerId: Nat;
+        transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload;
+    }): async* Float {
         let message = "I certify that I am the owner of the Ethereum account\n" # address;
         if (not(await ic_eth.verify_ecdsa(address, message, signature))) {
             Debug.trap("You are not the owner of the Ethereum account");
         };
-        await* scoreByEthereumAddress(address, scorerId, transform);
+        await* scoreByEthereumAddress({address; scorerId; transform});
     };
 
     public func scoreHTTPTransform(args: Types.TransformArgs): Types.HttpResponsePayload {
