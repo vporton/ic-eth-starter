@@ -29,8 +29,8 @@ const chains = [
 
 const appMetadata = {
   name: 'Example Identity App',
-  icon: '/public/logo.svg',
-  logo: '/public/logo.svg',
+  icon: '/logo.svg',
+  logo: '/logo.svg',
   description: 'Example app providing personhood on DFINITY Internet Computer',
   recommendedInjectedWallets: [
     { name: 'Coinbase', url: 'https://wallet.coinbase.com/' },
@@ -45,6 +45,7 @@ const appMetadata = {
 // })
 
 init({
+  appMetadata,
   apiKey,
   wallets: [injected],
   chains: [
