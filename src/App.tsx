@@ -91,11 +91,12 @@ function App() {
   }
   
   async function readScore() {
-    connect();
-    const signer = await (ethersProvider as any).getSigner();
-    const { address, signature } = await scoreSignature(signer);
-    const score = await backend.scoreBySignedEthereumAddress(address, signature);
-    setScore(score);
+    connect().then(async () => {
+      const signer = await ethersProvider.getSigner();
+      const { address, signature } = await scoreSignature(signer);
+      const score = await backend.scoreBySignedEthereumAddress(address, signature);
+      setScore(score);
+    });
   }
 
   return (
