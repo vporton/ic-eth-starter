@@ -62,9 +62,6 @@ module {
             };
         };
 
-        //3. 
-        //code to add cycles
-
         let response: Types.HttpResponsePayload = await ic.http_request(request);
         let ?body = Text.decodeUtf8(Blob.fromArray(response.body)) else {
             Debug.trap("scorer response is not UTF-8");
