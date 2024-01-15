@@ -93,9 +93,9 @@ function App() {
       <Container>
         <Row>
           <h1>Example Identity App</h1>
-          <button disabled={connecting} onClick={() => (wallet ? disconnect(wallet) : connect())}>
-            {connecting ? 'connecting' : wallet ? 'disconnect' : 'connect'}
-          </button>
+          <Button disabled={connecting} onClick={() => (wallet ? disconnect(wallet) : connect())}>
+            {connecting ? 'connecting' : wallet ? 'Disconnect Ethereum' : 'Connect Ethereum'}
+          </Button>
           <p>This is an example app for DFINITY Internet Computer, that connects to{' '}
             <a target='_blank' href="https://passport.gitcoin.co/" rel="noreferrer">Gitcoin Passport</a>{' '}
             to prove user's personhood (against so called <q>Sybil attack</q>, that is when
