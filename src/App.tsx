@@ -91,12 +91,17 @@ function App() {
   }
 
   async function readScore() {
-    connect().then(async () => {
+    async function doIt() {
       const signer = await ethersProvider.getSigner();
       const { address, signature } = await scoreSignature(signer);
       const score = await backend.scoreBySignedEthereumAddress({address, signature});
       setScore(score);
-    });
+    }
+    if (wallet) {
+      await doIt();
+    } else {
+      connect().then(doIt);
+    }
   }
 
   return (
