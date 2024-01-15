@@ -82,11 +82,11 @@ function App() {
   const [{ wallet, connecting }, connect, disconnect] = useConnectWallet()
 
   // create an ethers provider
-  let ethersProvider: ethers.Provider;
+  // let ethersProvider: ethers.BrowserProvider;
 
   if (wallet) {
     // if using ethers v6 this is:
-    ethersProvider = new ethers.BrowserProvider(wallet.provider, 'any')
+    // ethersProvider = new ethers.BrowserProvider(wallet.provider, 'any')
     // ethersProvider = new ethers.providers.Web3Provider(wallet.provider, 'any')
   }
 
@@ -94,6 +94,7 @@ function App() {
     if (!wallet) {
       await connect();
     }
+    const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any')
     const signer = await ethersProvider.getSigner();
     const { address, signature } = await scoreSignature(signer);
     const score = await backend.scoreBySignedEthereumAddress({address, signature});
