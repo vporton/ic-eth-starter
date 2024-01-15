@@ -4,26 +4,36 @@ import Row from 'react-bootstrap/Row';
 import Button from 'react-bootstrap/Button';
 // import Onboard from '@web3-onboard/core'
 import { init, useConnectWallet } from '@web3-onboard/react'
+import walletConnectModule, {
+  // WalletConnectOptions,
+} from "@web3-onboard/walletconnect";
 import injectedModule from '@web3-onboard/injected-wallets'
 import { ethers } from 'ethers'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 
-const apiKey = '1730eff0-9d50-4382-a3fe-89f0d34a2070'; // FIXME
+const walletConnectOptions/*: WalletConnectOptions*/ = {
+  projectId:
+    (process.env.REACT_APP_WALLET_CONNECT_PROJECT_ID as string) ||
+    "default-project-id",
+  };
+ 
+const blockNativeApiKey = process.env.REACT_APP_BLOCKNATIVE_KEY as string;
 
+const onBoardExploreUrl =
+  (process.env.REACT_APP_BLOCKNATIVE_KEY as string) ||
+  "http://localhost:3000/"; // TODO
+
+const walletConnect = walletConnectModule(walletConnectOptions);
 const injected = injectedModule()
-const wallets = [injected]
-
-const infuraKey = '<INFURA_KEY>'; // FIXME;
-const rpcUrl = `https://mainnet.infura.io/v3/${infuraKey}`;
-
+const wallets = [injected, walletConnect]
 
 const chains = [
   {
     id: 1,
     token: 'ETH',
     label: 'Ethereum Mainnet',
-    rpcUrl: 'https://mainnet.infura.io/v3/${INFURA_ID}'
+    rpcUrl: 'https://mainnet.infura.io/v3/${INFURA_ID}', // FIXME
   },
 ];
 
@@ -32,10 +42,21 @@ const appMetadata = {
   icon: '/logo.svg',
   logo: '/logo.svg',
   description: 'Example app providing personhood on DFINITY Internet Computer',
+  explore: onBoardExploreUrl,
   recommendedInjectedWallets: [
     { name: 'Coinbase', url: 'https://wallet.coinbase.com/' },
     { name: 'MetaMask', url: 'https://metamask.io' }
   ],
+};
+
+const accountCenter = {
+  desktop: {
+    enabled: true,
+  },
+  mobile: {
+    enabled: true,
+    minimal: true,
+  },
 };
 
 // const onboard = Onboard({
@@ -44,36 +65,12 @@ const appMetadata = {
 //   appMetadata
 // })
 
-init({
+const onboard = init({
   appMetadata,
-  apiKey,
-  wallets: [injected],
-  chains: [
-    {
-      id: '0x1',
-      token: 'ETH',
-      label: 'Ethereum Mainnet',
-      rpcUrl
-    },
-    {
-      id: 42161,
-      token: 'ARB-ETH',
-      label: 'Arbitrum One',
-      rpcUrl: 'https://rpc.ankr.com/arbitrum'
-    },
-    {
-      id: '0xa4ba',
-      token: 'ARB',
-      label: 'Arbitrum Nova',
-      rpcUrl: 'https://nova.arbitrum.io/rpc'
-    },
-    {
-      id: '0x2105',
-      token: 'ETH',
-      label: 'Base',
-      rpcUrl: 'https://mainnet.base.org'
-    }
-  ]
+  apiKey: blockNativeApiKey,
+  wallets,
+  chains,
+  accountCenter,
 });
 
 
