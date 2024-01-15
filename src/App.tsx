@@ -73,7 +73,6 @@ const onboard = init({
   accountCenter,
 });
 
-
 function App() {
   const [score, setScore] = useState<number | undefined>();
 
