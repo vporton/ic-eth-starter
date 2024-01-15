@@ -28,5 +28,8 @@
   },
   "files": [
     "dist"
-  ]
+  ],
+  "dependencies": {
+    "ethers": "^6.10.0"
+  }
 }

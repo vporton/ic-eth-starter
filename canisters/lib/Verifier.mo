@@ -118,7 +118,7 @@ module {
         await* scoreByEthereumAddress(address, scorerId, transform);
     };
 
-    public func scoreHTTPTransform(args: Types.TransformArgs): async Types.HttpResponsePayload {
+    public func scoreHTTPTransform(args: Types.TransformArgs): Types.HttpResponsePayload {
         {
             status = args.response.status;
             headers = [];
