@@ -14,6 +14,8 @@ import './App.css';
 import { scoreSignature } from 'passport_client_dfinity-client';
 import { backend } from './declarations/backend'
 
+require('dotenv').config();
+
 const walletConnectOptions/*: WalletConnectOptions*/ = {
   projectId:
     (process.env.REACT_APP_WALLET_CONNECT_PROJECT_ID as string) ||

@@ -6,7 +6,7 @@
       "frontend": {
         "entrypoint": "dist/index.html"
       },
-      "source": ["dist/"]
+      "source": ["build/"]
     },
     "backend": {
       "dependencies": ["ic_eth"],
@@ -34,5 +34,6 @@
     "build": {
       "packtool": "npm run --silent sources"
     }
-  }
+  },
+  "output_env_file": ".env"
 }
