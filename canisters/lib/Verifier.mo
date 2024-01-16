@@ -1,3 +1,4 @@
+import Cycles "mo:base/ExperimentalCycles";
 import Debug "mo:base/Debug";
 import Char "mo:base/Char";
 import Nat32 "mo:base/Nat32";
@@ -56,10 +57,12 @@ module {
             };
         };
 
+        Cycles.add(11_104_000);
         let response: Types.HttpResponsePayload = await ic.http_request(request);
         let ?body = Text.decodeUtf8(Blob.fromArray(response.body)) else {
             Debug.trap("scorer response is not UTF-8");
         };
+        Debug.print(body);
         let ?json = JSON.parse(body) else {
             Debug.trap("scorer response is not JSON");
         };

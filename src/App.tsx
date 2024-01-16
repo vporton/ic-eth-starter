@@ -101,6 +101,7 @@ function App() {
     const { address, signature } = await scoreSignature(signer);
     const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID);
     const score = await backend.scoreBySignedEthereumAddress({address, signature});
+    console.log(score)
     setScore(score);
   }
 
