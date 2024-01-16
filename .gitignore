@@ -18,6 +18,8 @@ node_modules/
 # misc
 .DS_Store
 /.env
+config.json
+our-canisters.json
 .env.local
 .env.development.local
 .env.test.local

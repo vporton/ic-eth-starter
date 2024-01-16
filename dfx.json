@@ -35,5 +35,6 @@
       "packtool": "npm run --silent sources"
     }
   },
+  "post_install": "env -i scripts/read-env.sh",
   "output_env_file": ".env"
 }

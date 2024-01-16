@@ -12,21 +12,21 @@ import { ethers } from 'ethers'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import { scoreSignature } from 'passport_client_dfinity-client';
-import { backend } from './declarations/backend'
-
-require('dotenv').config();
+import { createActor as createBackendActor } from './declarations/backend'
+import config from './config.json';
+import ourCanisters from './our-canisters.json';
 
 const walletConnectOptions/*: WalletConnectOptions*/ = {
   projectId:
-    (process.env.REACT_APP_WALLET_CONNECT_PROJECT_ID as string) ||
+    (config.WALLET_CONNECT_PROJECT_ID as string) ||
     "default-project-id",
   dappUrl: "http://localhost:3000/", // TODO
 };
  
-const blockNativeApiKey = process.env.REACT_APP_BLOCKNATIVE_KEY as string;
+const blockNativeApiKey = config.BLOCKNATIVE_KEY as string;
 
 const onBoardExploreUrl =
-  (process.env.REACT_APP_BLOCKNATIVE_KEY as string) ||
+  (config.BLOCKNATIVE_KEY as string) ||
   "http://localhost:3000/"; // TODO
 
 const walletConnect = walletConnectModule(walletConnectOptions);
@@ -99,6 +99,7 @@ function App() {
     const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any')
     const signer = await ethersProvider.getSigner();
     const { address, signature } = await scoreSignature(signer);
+    const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID);
     const score = await backend.scoreBySignedEthereumAddress({address, signature});
     setScore(score);
   }
