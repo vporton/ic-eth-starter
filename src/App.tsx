@@ -160,7 +160,7 @@ function App() {
               <Button disabled={connecting} onClick={() => (wallet ? disconnect(wallet) : connect())}>
                 {connecting ? 'connecting' : wallet ? 'Disconnect Ethereum' : 'Connect Ethereum'}
               </Button>{' '}
-              witht he same wallet.
+              with the same wallet.
             </li>
             <li>Check the score<br/>
               <Button disabled={!agent || !wallet} onClick={obtainScore}>Get you identity score</Button>
