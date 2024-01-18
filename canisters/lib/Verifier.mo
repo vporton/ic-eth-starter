@@ -130,6 +130,28 @@ module {
         await* submitEthereumAddressForScore({address; scorerId; transform});
     };
 
+    public func extractItemScoreFromBody(body: Text): Float {
+        let ?json = JSON.parse(body) else {
+            Debug.trap("Passport response is not JSON");
+        };
+        extractItemScoreFromJSON(json);
+    };
+
+    public func extractItemScoreFromJSON(json: JSON.JSON): Float {
+        let #Object obj = json else {
+            Debug.trap("Wrong JSON format");
+        };
+        for (e in obj.vals()) {
+            if (e.0 == "score") {
+                let #String item = e.1 else {
+                    Debug.trap("Wrong JSON format");
+                };
+                return textToFloat(item)
+            }
+        };
+        Debug.trap("No score");
+    };
+
     public func removeHTTPHeaders(args: Types.TransformArgs): Types.HttpResponsePayload {
         {
             status = args.response.status;
