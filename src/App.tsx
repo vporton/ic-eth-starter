@@ -163,10 +163,12 @@ function App() {
               witht he same wallet.
             </li>
             <li>Check the score<br/>
-              <Button disabled={!agent || !wallet || !agent} onClick={obtainScore}>Get you identity score</Button>
+              <Button disabled={!agent || !wallet} onClick={obtainScore}>Get you identity score</Button>
             </li>
             <li>If needed,<br/>
-              <Button disabled={!address || !signature || !agent} onClick={recalculateScore}>Recalculate your identity score</Button>
+              <Button disabled={!address || !signature || !agent || !wallet} onClick={recalculateScore}>
+                Recalculate your identity score
+              </Button>
             </li>
           </ol>
           <p>Your identity score:{' '}
