@@ -1,4 +1,5 @@
 {
+    "MAINNET_RPC": "<URL>",
     "WALLET_CONNECT_PROJECT_ID": "<KEY>",
     "BLOCKNATIVE_KEY": "<KEY>",
     "IS_LOCAL": true|false

@@ -40,7 +40,7 @@ const chains = [
     id: 1,
     token: 'ETH',
     label: 'Ethereum Mainnet',
-    rpcUrl: `https://mainnet.infura.io/v3/${config.INFURA_ID}`, // FIXME
+    rpcUrl: config.MAINNET_RPC,
   },
 ];
 
