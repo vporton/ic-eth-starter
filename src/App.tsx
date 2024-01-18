@@ -115,22 +115,27 @@ function App() {
 
   async function obtainScore() {
     try {
-      const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any'); // TODO: duplicate code
-      const signer = await ethersProvider.getSigner();
+      let localAddress = address;
+      let localSignature = signature;
       if (!address || !signature) {
+        const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any'); // TODO: duplicate code
+        const signer = await ethersProvider.getSigner();
         const { address, signature } = await scoreSignature(signer);
+        localAddress = address;
+        localSignature = signature;
         setAddress(address);
         setSignature(signature);
       }
       setObtainScoreLoading(true);
       const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID, {agent});
       try {
-        const result = await backend.scoreBySignedEthereumAddress({address: address!, signature: signature!});
+        const result = await backend.scoreBySignedEthereumAddress({address: localAddress!, signature: localSignature!});
         const j = JSON.parse(result);
         let score = j.score;
-        setScore(/^\d+(\.\d+)/.test(score) ? score : 'retrieved-none');
+        setScore(/^\d+(\.\d+)/.test(score) ? Number(score) : 'retrieved-none');
       }
-      catch(_) {
+      catch(e) {
+        console.log(e);
         setScore('retrieved-none');
       }
     }
@@ -148,7 +153,7 @@ function App() {
         const result = await backend.submitSignedEthereumAddressForScore({address: address!, signature: signature!});
         const j = JSON.parse(result);
         let score = j.score;
-        setScore(/^\d+(\.\d+)?/.test(score) ? score : 'retrieved-none');
+        setScore(/^\d+(\.\d+)?/.test(score) ? Number(score) : 'retrieved-none');
       }
       catch(_) {
         setScore('retrieved-none');
