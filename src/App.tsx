@@ -113,9 +113,11 @@ function App() {
   async function obtainScore() {
     const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any'); // TODO: duplicate code
     const signer = await ethersProvider.getSigner();
-    const { address, signature } = await scoreSignature(signer);
-    setAddress(address);
-    setSignature(signature);
+    if (!address || !signature) {
+      const { address, signature } = await scoreSignature(signer);
+      setAddress(address);
+      setSignature(signature);
+    }
     const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID, {agent});
     try {
       const result = await backend.scoreBySignedEthereumAddress({address, signature});
