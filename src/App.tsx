@@ -168,7 +168,7 @@ function App() {
                 {connecting ? 'connecting' : wallet ? 'Disconnect Ethereum' : 'Connect Ethereum'}
               </Button>{' '}
               with the same wallet, as one you used for Gitcoin Password.<br/>
-              Your wallet: {address ? `<small>${address}</small>` : 'not connected'}.
+              Your wallet: {address ? <small>{address}</small> : 'not connected'}.
             </li>
             <li>Check the score<br/>
               <Button disabled={!agent || !wallet} onClick={obtainScore}>Get you identity score</Button>
