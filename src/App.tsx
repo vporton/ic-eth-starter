@@ -22,14 +22,12 @@ const walletConnectOptions/*: WalletConnectOptions*/ = {
   projectId:
     (config.WALLET_CONNECT_PROJECT_ID as string) ||
     "default-project-id",
-  dappUrl: "http://localhost:3000/", // TODO
+  dappUrl: config.DAPP_URL,
 };
  
 const blockNativeApiKey = config.BLOCKNATIVE_KEY as string;
 
-const onBoardExploreUrl =
-  (config.BLOCKNATIVE_KEY as string) ||
-  "http://localhost:3000/"; // TODO
+const onBoardExploreUrl = undefined;
 
 const walletConnect = walletConnectModule(walletConnectOptions);
 const injected = injectedModule()
@@ -150,7 +148,6 @@ function App() {
     }
   }
 
-  // TODO: Enable button only when all variables are true.
   async function recalculateScore() {
     try {
       setRecalculateScoreLoading(true);

@@ -70,7 +70,7 @@ module {
             headers = [{name = "X-API-KEY"; value = Config.scorerAPIKey}];
             max_response_bytes = ?10000;
             method = #get;
-            url = "https://api.scorer.gitcoin.co/registry/score/" # Nat.toText(scorerId) # "/" # address; // TODO: Configurable URL
+            url = Config.scorerUrl # "/registry/score/" # Nat.toText(scorerId) # "/" # address;
             transform = ?{
                 function = transform;
                 context = Blob.fromArray([]);
@@ -79,7 +79,6 @@ module {
         await* obtainSuccessfulResponse(request);
     };
 
-    // TODO: Signature - text or blob?
     public func scoreBySignedEthereumAddress({
         address: Text;
         signature: Text;
@@ -112,7 +111,7 @@ module {
             ];
             max_response_bytes = ?10000;
             method = #post;
-            url = "https://api.scorer.gitcoin.co/registry/submit-passport";
+            url = Config.scorerUrl # "/registry/submit-passport";
             transform = ?{
                 function = transform;
                 context = Blob.fromArray([]);
