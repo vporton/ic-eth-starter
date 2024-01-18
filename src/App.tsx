@@ -128,7 +128,7 @@ function App() {
       const result = await backend.submitSignedEthereumAddressForScore({address: address!, signature: signature!});
       const j = JSON.parse(result);
       let score = j.score;
-      setScore(/^\d+(\.\d+)/.test(score) ? score : 'retrieved-none');
+      setScore(/^\d+(\.\d+)?/.test(score) ? score : 'retrieved-none');
     }
     catch(_) {
       setScore('retrieved-none');
