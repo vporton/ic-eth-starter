@@ -88,6 +88,8 @@ function App() {
     agent.fetchRootKey();
   }
 
+  const [signature, setSignature] = useState<string>();
+  const [address, setAddress] = useState<string>();
   const [score, setScore] = useState<number | 'didnt-read' | 'retrieved-none'>('didnt-read');
 
   const [{ wallet, connecting }, connect, disconnect] = useConnectWallet();
@@ -101,39 +103,43 @@ function App() {
     // ethersProvider = new ethers.providers.Web3Provider(wallet.provider, 'any')
   }
 
-  useEffect(() => {
-    console.log(`wallet/agent ${wallet}/${agent}`)
-    if (!wallet || !agent || connecting) {
-      return;
+  async function obtainScore() {
+    const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any');
+    const signer = await ethersProvider.getSigner();
+    const { address, signature } = await scoreSignature(signer);
+    setAddress(address);
+    setSignature(signature);
+    const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID, {agent});
+    try {
+      const result = await backend.scoreBySignedEthereumAddress({address, signature});
+      const j = JSON.parse(result);
+      let score = j.items[0].score;
+      setScore(/^\d+(\.\d+)/.test(score) ? score : 'retrieved-none');
     }
-    async function doIt() {
-      const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any');
-      const signer = await ethersProvider.getSigner();
-      const { address, signature } = await scoreSignature(signer);
-      const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID, {agent});
-      try {
-        const score = await backend.scoreBySignedEthereumAddress({address, signature});
-        setScore(score);
-      }
-      catch(_) {
-        setScore('retrieved-none');
-      }
+    catch(_) {
+      setScore('retrieved-none');
     }
-    doIt().then(() => {});
-  }, [wallet, agent, connecting]);
+  }
 
   // TODO: Enable button only when all variables are true.
   async function recalculateScore() {
-  }
+    const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID, {agent}); // TODO: duplicate code
+    try {
+      const result = await backend.submitSignedEthereumAddressForScore({address: address!, signature: signature!});
+      const j = JSON.parse(result);
+      let score = j.score;
+      setScore(/^\d+(\.\d+)/.test(score) ? score : 'retrieved-none');
+    }
+    catch(_) {
+      setScore('retrieved-none');
+    }
+}
 
   return (
     <div className="App">
       <Container>
         <Row>
           <h1>Example Identity App</h1>
-          <Button disabled={connecting} onClick={() => (wallet ? disconnect(wallet) : connect())}>
-            {connecting ? 'connecting' : wallet ? 'Disconnect Ethereum' : 'Connect Ethereum'}
-          </Button>
           <p>This is an example app for DFINITY Internet Computer, that connects to{' '}
             <a target='_blank' href="https://passport.gitcoin.co" rel="noreferrer">Gitcoin Passport</a>{' '}
             to prove user's personhood (against so called <q>Sybil attack</q>, that is when
@@ -150,8 +156,16 @@ function App() {
           <ol>
             <li>Go to <a target='_blank' href="https://passport.gitcoin.co" rel="noreferrer">Gitcoin Passport</a>{' '}
               and prove your personhood.</li>
-            <li>Return to this app and check that it works with the same Ethereum wallet:<br/>
-              <Button disabled={!!wallet && !connecting} onClick={recalculateScore}>Check your identity score</Button>
+            <li>Return to this app and
+              <Button disabled={connecting} onClick={() => (wallet ? disconnect(wallet) : connect())}>
+                {connecting ? 'connecting' : wallet ? 'Disconnect Ethereum' : 'Connect Ethereum'}
+              </Button>.
+            <li>Check the score<br/>
+              <Button disabled={!address || !signature || !agent || !wallet || !agent} onClick={obtainScore}>Get you identity score</Button>
+            </li>
+            </li>
+            <li>If needed,<br/>
+              <Button disabled={!address || !signature || !agent} onClick={recalculateScore}>Recalculate your identity score</Button>
             </li>
           </ol>
           <p>Your identity score:{' '}

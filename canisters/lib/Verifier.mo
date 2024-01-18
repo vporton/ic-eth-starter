@@ -40,7 +40,7 @@ module {
         result;
     };
 
-    func obtainSuccessfulJSON(request: Types.HttpRequestArgs): async* JSON.JSON {
+    func obtainSuccessfulResponse(request: Types.HttpRequestArgs): async* Text {
         Cycles.add(20_000_000);
         let response: Types.HttpResponsePayload = await ic.http_request(request);
         if (response.status != 200) {
@@ -49,10 +49,7 @@ module {
         let ?body = Text.decodeUtf8(Blob.fromArray(response.body)) else {
             Debug.trap("Passport response is not UTF-8");
         };
-        let ?json = JSON.parse(body) else {
-            Debug.trap("Passport response is not JSON");
-        };
-        json;
+        body;
     };
 
     // FIXME: Add random nonce for more security.
@@ -63,12 +60,11 @@ module {
         };
     };
 
-    /// Remember to add cycles for the HTTP request.
     public func scoreByEthereumAddress({
         address: Text;
         scorerId: Nat;
         transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload;
-    }): async* Float {
+    }): async* Text {
         let request : Types.HttpRequestArgs = {
             body = null;
             headers = [{name = "X-API-KEY"; value = Config.scorerAPIKey}];
@@ -80,51 +76,58 @@ module {
                 context = Blob.fromArray([]);
             };
         };
-
-        let json = await* obtainSuccessfulJSON(request);
-
-        let scoreOption = label b: ?Text {
-            let #Object jsonObject = json else {
-                break b null;
-            };
-            for (e in jsonObject.vals()) {
-                if (e.0 == "items") {
-                    let #Array items = e.1 else {
-                        break b null;
-                    };
-                    let #Object item = items[0] else {
-                        break b null;
-                    };
-                    for (e in item.vals()) {
-                        if (e.0 == "address") {
-                            let #String address = e.1 else { // Trap if is null.
-                                break b null;
-                            };
-                            break b (?address);
-                        };
-                    };
-                } else {
-                    break b null;
-                };
-            };
-            null;
-        };
-        let ?score = scoreOption else {
-            Debug.trap("Unsupported JSON format");
-        };
-        0.0; //textToFloat(score); // FIXME
+        await* obtainSuccessfulResponse(request);
     };
 
     // TODO: Signature - text or blob?
-    /// Remember to add cycles for the HTTP request.
     public func scoreBySignedEthereumAddress({
         address: Text;
         signature: Text;
         scorerId: Nat;
         transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload;
-    }): async* Float {
+    }): async* Text {
         await* checkAddressOwner({address; signature});
         await* scoreByEthereumAddress({address; scorerId; transform});
+    };
+
+    public func submitEthereumAddressForScore({
+        address: Text;
+        scorerId: Nat;
+        transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload;
+    }): async* Text {
+        let requestBody = JSON.show(
+            #Object ([
+                ("address", #String address),
+                ("scorer_id", #String(Nat.toText(scorerId))),
+                // ("signature", #String TODO),
+                // ("nonce", #String TODO),
+            ]),
+        );
+        let request : Types.HttpRequestArgs = {
+            body = ?(Blob.toArray(Text.encodeUtf8(requestBody)));
+            headers = [
+                {name = "X-API-KEY"; value = Config.scorerAPIKey},
+                {name = "Content-Type"; value = "application/json"},
+            ];
+            max_response_bytes = ?10000;
+            method = #post;
+            url = "https://api.scorer.gitcoin.co/registry/submit-passport";
+            transform = ?{
+                function = transform;
+                context = Blob.fromArray([]);
+            };
+        };
+        await* obtainSuccessfulResponse(request);
+    };
+
+    public func submitSignedEthereumAddressForScore({
+        address: Text;
+        signature: Text;
+        scorerId: Nat;
+        transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload;
+    }): async* Text {
+        await* checkAddressOwner({address; signature});
+        await* submitEthereumAddressForScore({address; scorerId; transform});
     };
 
     public func removeHTTPHeaders(args: Types.TransformArgs): Types.HttpResponsePayload {
@@ -137,7 +140,7 @@ module {
 
     // adopted from https://forum.dfinity.org/t/how-to-convert-text-to-float/15982/2?u=qwertytrewq
     // FIXME: Scorer returns `"0E-9"` if zero score.
-    public func textToFloat(t: Text) : async Float {
+    public func textToFloat(t: Text): Float {
         var i : Float = 1;
         var f : Float = 0;
         var isDecimal : Bool = false;
@@ -160,7 +163,7 @@ module {
                 isDecimal := true;
                 i := 1;
             } else {
-                throw Debug.trap("NaN");
+                Debug.trap("NaN");
             };
         };
         };

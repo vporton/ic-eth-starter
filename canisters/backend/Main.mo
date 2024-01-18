@@ -3,9 +3,19 @@ import V "../lib/Verifier";
 import Conf "../../Config";
 
 actor Main {
-    public shared func scoreBySignedEthereumAddress({address: Text; signature: Text}): async Float {
+    public shared func scoreBySignedEthereumAddress({address: Text; signature: Text}): async Text {
         // A real app would store the verified address somewhere instead of just returning the score to frontend.
         await* V.scoreBySignedEthereumAddress({
+            address;
+            signature;
+            scorerId = Conf.scorerId;
+            transform = removeHTTPHeaders;
+        });
+    };
+
+    public shared func submitSignedEthereumAddressForScore({address: Text; signature: Text}): async Text {
+        // A real app would store the verified address somewhere instead of just returning the score to frontend.
+        await* V.submitSignedEthereumAddressForScore({
             address;
             signature;
             scorerId = Conf.scorerId;
