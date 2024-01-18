@@ -146,7 +146,7 @@ module {
                 let #String score = e.1 else {
                     Debug.trap("Wrong JSON format");
                 };
-                return textToFloat(score)
+                return textToFloat(score);
             }
         };
         Debug.trap("No score");
