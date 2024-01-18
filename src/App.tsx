@@ -113,7 +113,7 @@ function App() {
     try {
       const result = await backend.scoreBySignedEthereumAddress({address, signature});
       const j = JSON.parse(result);
-      let score = j.items[0].score;
+      let score = j.score;
       setScore(/^\d+(\.\d+)/.test(score) ? score : 'retrieved-none');
     }
     catch(_) {
@@ -142,7 +142,7 @@ function App() {
           <h1>Example Identity App</h1>
           <p>This is an example app for DFINITY Internet Computer, that connects to{' '}
             <a target='_blank' href="https://passport.gitcoin.co" rel="noreferrer">Gitcoin Passport</a>{' '}
-            to prove user's personhood (against so called <q>Sybil attack</q>, that is when
+            to prove user's personhood and uniqueness (for example, against so called <q>Sybil attack</q>, that is when
             a user votes more than once).</p>
           <p>The current version of this app requires use of an Ethereum wallet that you need
             both in Gitcoin Passport and in this app. (So, in real Internet Computer apps
@@ -160,7 +160,7 @@ function App() {
               <Button disabled={connecting} onClick={() => (wallet ? disconnect(wallet) : connect())}>
                 {connecting ? 'connecting' : wallet ? 'Disconnect Ethereum' : 'Connect Ethereum'}
               </Button>{' '}
-              with the same wallet.
+              with the same wallet, as one you used for Gitcoin Password.
             </li>
             <li>Check the score<br/>
               <Button disabled={!agent || !wallet} onClick={obtainScore}>Get you identity score</Button>
