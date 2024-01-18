@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Button from 'react-bootstrap/Button';
@@ -15,6 +15,7 @@ import { scoreSignature } from 'passport_client_dfinity-client';
 import { createActor as createBackendActor } from './declarations/backend'
 import config from './config.json';
 import ourCanisters from './our-canisters.json';
+import { HttpAgent } from '@dfinity/agent';
 
 const walletConnectOptions/*: WalletConnectOptions*/ = {
   projectId:
@@ -38,7 +39,7 @@ const chains = [
     id: 1,
     token: 'ETH',
     label: 'Ethereum Mainnet',
-    rpcUrl: 'https://mainnet.infura.io/v3/${INFURA_ID}', // FIXME
+    rpcUrl: `https://mainnet.infura.io/v3/${config.INFURA_ID}`, // FIXME
   },
 ];
 
@@ -78,10 +79,18 @@ const onboard = init({
   accountCenter,
 });
 
+// UI actions:
+// - connect: ask for signature, store the signature, try to retrieve, show retrieval status
+// - recalculate: recalculate, show retrieval status
 function App() {
-  const [score, setScore] = useState<number | undefined>();
+  const agent = new HttpAgent({});
+  if (config.IS_LOCAL) {
+    agent.fetchRootKey();
+  }
 
-  const [{ wallet, connecting }, connect, disconnect] = useConnectWallet()
+  const [score, setScore] = useState<number | 'didnt-read' | 'retrieved-none'>('didnt-read');
+
+  const [{ wallet, connecting }, connect, disconnect] = useConnectWallet();
 
   // create an ethers provider
   // let ethersProvider: ethers.BrowserProvider;
@@ -92,17 +101,29 @@ function App() {
     // ethersProvider = new ethers.providers.Web3Provider(wallet.provider, 'any')
   }
 
-  async function readScore() {
-    if (!wallet) {
-      await connect();
+  useEffect(() => {
+    console.log(`wallet/agent ${wallet}/${agent}`)
+    if (!wallet || !agent || connecting) {
+      return;
     }
-    const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any')
-    const signer = await ethersProvider.getSigner();
-    const { address, signature } = await scoreSignature(signer);
-    const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID);
-    const score = await backend.scoreBySignedEthereumAddress({address, signature});
-    console.log(score)
-    setScore(score);
+    async function doIt() {
+      const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any');
+      const signer = await ethersProvider.getSigner();
+      const { address, signature } = await scoreSignature(signer);
+      const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID, {agent});
+      try {
+        const score = await backend.scoreBySignedEthereumAddress({address, signature});
+        setScore(score);
+      }
+      catch(_) {
+        setScore('retrieved-none');
+      }
+    }
+    doIt().then(() => {});
+  }, [wallet, agent, connecting]);
+
+  // TODO: Enable button only when all variables are true.
+  async function recalculateScore() {
   }
 
   return (
@@ -130,13 +151,15 @@ function App() {
             <li>Go to <a target='_blank' href="https://passport.gitcoin.co" rel="noreferrer">Gitcoin Passport</a>{' '}
               and prove your personhood.</li>
             <li>Return to this app and check that it works with the same Ethereum wallet:<br/>
-              <Button onClick={readScore}>Check your identity score</Button>
+              <Button disabled={!!wallet && !connecting} onClick={recalculateScore}>Check your identity score</Button>
             </li>
           </ol>
           <p>Your identity score:{' '}
-            {score === undefined ? 'Click the above button to check.'
-              : `${score} ${score >= 20 ? '(Congratulations: You\'ve been verified.)'
-                : '(Sorry: It\'s <20, you are considered a bot.)'}`}
+            {score === 'didnt-read' ? 'Click the above button to check.'
+              : score === 'retrieved-none' ? 'Not yet calculated'
+              : `${score} ${typeof score == 'number' && score >= 20
+              ? '(Congratulations: You\'ve been verified.)'
+              : '(Sorry: It\'s <20, you are considered a bot.)'}`}
           </p>
         </Row>
       </Container>

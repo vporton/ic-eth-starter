@@ -14,6 +14,7 @@ import ic_eth "canister:ic_eth";
 import Types "./Types";
 import JSON "mo:json.mo/JSON";
 import Parser "mo:parser-combinators/Parser";
+import Config "../../Config";
 
 module {
     public type EthereumAddress = Blob;
@@ -37,6 +38,14 @@ module {
         result;
     };
 
+    // FIXME: Add random nonce for more security.
+    public func checkAddressOwner({address: Text; signature: Text}): async* () {
+        let message = "I certify that I am the owner of the Ethereum account\n" # address;
+        if (not(await ic_eth.verify_ecdsa(address, message, signature))) {
+            Debug.trap("You are not the owner of the Ethereum account");
+        };
+    };
+
     /// Remember to add cycles for the HTTP request.
     public func scoreByEthereumAddress({
         address: Text;
@@ -47,7 +56,7 @@ module {
 
         let request : Types.HttpRequestArgs = {
             body = null;
-            headers = []; // FIXME: API KEY
+            headers = [{name = "X-API-KEY"; value = Config.scorerAPIKey}];
             max_response_bytes = ?10000;
             method = #get;
             url = "https://api.scorer.gitcoin.co/registry/score/" # Nat.toText(scorerId) # "/" # address; // TODO: Configurable URL
@@ -57,8 +66,11 @@ module {
             };
         };
 
-        Cycles.add(11_104_000);
+        Cycles.add(20_000_000);
         let response: Types.HttpResponsePayload = await ic.http_request(request);
+        if (response.status != 200) {
+            Debug.trap("Passport HTTP response code " # Nat.toText(response.status))
+        }
         let ?body = Text.decodeUtf8(Blob.fromArray(response.body)) else {
             Debug.trap("scorer response is not UTF-8");
         };
@@ -81,7 +93,7 @@ module {
                     };
                     for (e in item.vals()) {
                         if (e.0 == "address") {
-                            let #String address = e.1 else { // FIXME: It may be null.
+                            let #String address = e.1 else { // Trap if is null.
                                 break b null;
                             };
                             break b (?address);
@@ -107,14 +119,11 @@ module {
         scorerId: Nat;
         transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload;
     }): async* Float {
-        let message = "I certify that I am the owner of the Ethereum account\n" # address;
-        if (not(await ic_eth.verify_ecdsa(address, message, signature))) {
-            Debug.trap("You are not the owner of the Ethereum account");
-        };
+        await* checkAddressOwner({address; signature});
         await* scoreByEthereumAddress({address; scorerId; transform});
     };
 
-    public func scoreHTTPTransform(args: Types.TransformArgs): Types.HttpResponsePayload {
+    public func removeHTTPHeaders(args: Types.TransformArgs): Types.HttpResponsePayload {
         {
             status = args.response.status;
             headers = [];
@@ -123,6 +132,7 @@ module {
     };
 
     // adopted from https://forum.dfinity.org/t/how-to-convert-text-to-float/15982/2?u=qwertytrewq
+    // FIXME: Scorer returns `"0E-9"` if zero score.
     public func textToFloat(t: Text) : async Float {
         var i : Float = 1;
         var f : Float = 0;

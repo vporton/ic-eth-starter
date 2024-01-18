@@ -9,11 +9,11 @@ actor Main {
             address;
             signature;
             scorerId = Conf.scorerId;
-            transform = scoreHTTPTransform;
+            transform = removeHTTPHeaders;
         });
     };
 
-    public shared query func scoreHTTPTransform(args: Types.TransformArgs): async Types.HttpResponsePayload {
-        V.scoreHTTPTransform(args);
+    public shared query func removeHTTPHeaders(args: Types.TransformArgs): async Types.HttpResponsePayload {
+        V.removeHTTPHeaders(args);
     };
 }
