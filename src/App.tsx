@@ -156,13 +156,14 @@ function App() {
           <ol>
             <li>Go to <a target='_blank' href="https://passport.gitcoin.co" rel="noreferrer">Gitcoin Passport</a>{' '}
               and prove your personhood.</li>
-            <li>Return to this app and
+            <li>Return to this app and<br/>
               <Button disabled={connecting} onClick={() => (wallet ? disconnect(wallet) : connect())}>
                 {connecting ? 'connecting' : wallet ? 'Disconnect Ethereum' : 'Connect Ethereum'}
-              </Button>.
-            <li>Check the score<br/>
-              <Button disabled={!address || !signature || !agent || !wallet || !agent} onClick={obtainScore}>Get you identity score</Button>
+              </Button>{' '}
+              witht he same wallet.
             </li>
+            <li>Check the score<br/>
+              <Button disabled={!agent || !wallet || !agent} onClick={obtainScore}>Get you identity score</Button>
             </li>
             <li>If needed,<br/>
               <Button disabled={!address || !signature || !agent} onClick={recalculateScore}>Recalculate your identity score</Button>
