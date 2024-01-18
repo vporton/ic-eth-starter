@@ -94,6 +94,13 @@ function App() {
 
   const [{ wallet, connecting }, connect, disconnect] = useConnectWallet();
 
+  useEffect(() => {
+    if (!wallet) {
+      setAddress(undefined);
+      setSignature(undefined);
+    }
+  }, [wallet]);
+
   async function obtainScore() {
     const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any');
     const signer = await ethersProvider.getSigner();
@@ -151,7 +158,8 @@ function App() {
               <Button disabled={connecting} onClick={() => (wallet ? disconnect(wallet) : connect())}>
                 {connecting ? 'connecting' : wallet ? 'Disconnect Ethereum' : 'Connect Ethereum'}
               </Button>{' '}
-              with the same wallet, as one you used for Gitcoin Password.
+              with the same wallet, as one you used for Gitcoin Password.<br/>
+              Your wallet: {address ? `<small>${address}</small>` : 'not connected'}.
             </li>
             <li>Check the score<br/>
               <Button disabled={!agent || !wallet} onClick={obtainScore}>Get you identity score</Button>
