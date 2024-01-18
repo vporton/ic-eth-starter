@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Button from 'react-bootstrap/Button';
@@ -11,7 +11,6 @@ import injectedModule from '@web3-onboard/injected-wallets'
 import { ethers } from 'ethers'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import { scoreSignature } from 'passport_client_dfinity-client';
 import { createActor as createBackendActor } from './declarations/backend'
 import config from './config.json';
 import ourCanisters from './our-canisters.json';
@@ -82,12 +81,13 @@ const onboard = init({
 // - connect: ask for signature, store the signature, try to retrieve, show retrieval status
 // - recalculate: recalculate, show retrieval status
 function App() {
-  const agent = new HttpAgent({});
+  const agent = useMemo(() => new HttpAgent({}), []);
   if (config.IS_LOCAL) {
     agent.fetchRootKey();
   }
 
   const [signature, setSignature] = useState<string>();
+  const [message, setMessage] = useState<string>();
   const [nonce, setNonce] = useState<string>();
   const [address, setAddress] = useState<string>();
   const [score, setScore] = useState<number | 'didnt-read' | 'retrieved-none'>('didnt-read');
@@ -108,31 +108,33 @@ function App() {
       });      
     } else {
       setAddress(undefined);
-      setSignature(undefined);
     }
   }, [wallet]);
 
   async function obtainScore() {
     try {
-      let localAddress = address;
-      let localSignature = signature;
-      let localNonce = nonce;
-      if (!address || !signature) {
-        const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any'); // TODO: duplicate code
-        const signer = await ethersProvider.getSigner();
-        const { address, signature, nonce } = await scoreSignature(signer);
-        localAddress = address;
-        localSignature = signature;
-        localNonce = nonce;
-        setAddress(address);
-        setSignature(signature);
-        setNonce(nonce);
-      }
-      setObtainScoreLoading(true);
-      const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID, {agent});
       try {
+        setObtainScoreLoading(true);
+        let localMessage = message;
+        let localNonce = nonce;
+        const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID, {agent}); // TODO: duplicate code
+        if (nonce === undefined) {
+          const {message, nonce} = await backend.getEthereumSigningMessage();
+          localMessage = message;
+          localNonce = nonce;
+          setMessage(localMessage);
+          setNonce(localNonce);
+        }
+        let localSignature = signature;
+        if (signature === undefined) {
+          const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any'); // TODO: duplicate code
+          const signer = await ethersProvider.getSigner();
+          let signature = await signer.signMessage(localMessage!);
+          localSignature = signature;
+          setSignature(localSignature);
+        }
         const result = await backend.scoreBySignedEthereumAddress({
-          address: localAddress!, signature: localSignature!, nonce: localNonce!
+          address: address!, signature: localSignature!, nonce: localNonce!
         });
         const j = JSON.parse(result);
         let score = j.score;
@@ -141,6 +143,7 @@ function App() {
       catch(e) {
         console.log(e);
         setScore('retrieved-none');
+        alert(e);
       }
     }
     finally {
@@ -158,8 +161,9 @@ function App() {
         let score = j.score;
         setScore(/^\d+(\.\d+)?/.test(score) ? Number(score) : 'retrieved-none');
       }
-      catch(_) {
+      catch(e) {
         setScore('retrieved-none');
+        alert(e)
       }
     }
     finally {
@@ -200,7 +204,7 @@ function App() {
               <ClipLoader loading={obtainScoreLoading}/>{' '}
             </li>
             <li>If needed,<br/>
-              <Button disabled={!address || !signature || !agent || !wallet} onClick={recalculateScore}>
+              <Button disabled={!address || !signature || !agent || !wallet || !nonce} onClick={recalculateScore}>
                 Recalculate your identity score
               </Button>
               <ClipLoader loading={recalculateScoreLoading}/>{' '}

@@ -27,6 +27,10 @@ actor Main {
         });
     };
 
+    public shared func getEthereumSigningMessage(): async {message: Text; nonce: Text} {
+        await* V.getEthereumSigningMessage({transform = removeHTTPHeaders});
+    };
+
     public shared query func removeHTTPHeaders(args: Types.TransformArgs): async Types.HttpResponsePayload {
         V.removeHTTPHeaders(args);
     };

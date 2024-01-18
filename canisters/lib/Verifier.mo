@@ -34,9 +34,9 @@ module {
     func encodeHex(g: Blob): Text {
         var result = "";
         for (b in g.vals()) {
-        let b2 = Nat8.toNat(b);
-            result #= Text.fromChar(_toLowerHexDigit(b2 / 16)) # Text.fromChar(_toLowerHexDigit(b2 % 16));
-        };
+            let b2 = Nat8.toNat(b);
+                result #= Text.fromChar(_toLowerHexDigit(b2 / 16)) # Text.fromChar(_toLowerHexDigit(b2 % 16));
+            };
         result;
     };
 
@@ -52,9 +52,18 @@ module {
         body;
     };
 
+    public func obtainSuccessfulJSONResponse(request: Types.HttpRequestArgs): async* JSON.JSON {
+        let body = await* obtainSuccessfulResponse(request);
+        let ?json = JSON.parse(body) else {
+            Debug.trap("Passport response is not JSON");
+        };
+        json;
+    };
+
     public func checkAddressOwner({address: Text; signature: Text; nonce: Text}): async* () {
-        let message = "I am the owner of the Ethereum account\n" # address #
-            "\n\nwhich I certify by providing a random value:\n" # nonce;
+        // the same text as returned by `GET /registry/signing-message`
+        let message = "I hereby agree to submit my address in order to score my associated Gitcoin Passport from Ceramic.\n\nNonce: "
+            # nonce # "\n";
         if (not(await ic_eth.verify_ecdsa(address, message, signature))) {
             Debug.trap("You are not the owner of the Ethereum account");
         };
@@ -119,6 +128,47 @@ module {
         };
         await* obtainSuccessfulResponse(request);
     };
+
+    public func getEthereumSigningMessage({
+        transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload;
+    }): async* {message: Text; nonce: Text} {
+        let request : Types.HttpRequestArgs = {
+            body = null;
+            headers = [
+                {name = "X-API-KEY"; value = Config.scorerAPIKey},
+            ];
+            max_response_bytes = ?10000;
+            method = #get;
+            url = Config.scorerUrl # "/registry/signing-message";
+            transform = ?{
+                function = transform;
+                context = Blob.fromArray([]);
+            };
+        };
+        let response = await* obtainSuccessfulJSONResponse(request);
+        let #Object obj = response else {
+            Debug.trap("Wrong JSON format");
+        };
+        var message1: ?Text = null;
+        var nonce1: ?Text = null;
+        for (e in obj.vals()) {
+            if (e.0 == "message") {
+                let #String message0 = e.1 else {
+                    Debug.trap("Wrong JSON format");
+                };
+                message1 := ?message0;
+            } else if (e.0 == "nonce") {
+                let #String nonce0 = e.1 else {
+                    Debug.trap("Wrong JSON format");
+                };
+                nonce1 := ?nonce0;
+            };
+        };
+        let (?message, ?nonce) = (message1, nonce1) else {
+            Debug.trap("Wrong JSON format");
+        };
+        {message; nonce};
+   };
 
     public func submitSignedEthereumAddressForScore({
         address: Text;
