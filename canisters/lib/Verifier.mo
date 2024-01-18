@@ -143,10 +143,10 @@ module {
         };
         for (e in obj.vals()) {
             if (e.0 == "score") {
-                let #String item = e.1 else {
+                let #String score = e.1 else {
                     Debug.trap("Wrong JSON format");
                 };
-                return textToFloat(item)
+                return textToFloat(score)
             }
         };
         Debug.trap("No score");
