@@ -70,7 +70,7 @@ module {
         let response: Types.HttpResponsePayload = await ic.http_request(request);
         if (response.status != 200) {
             Debug.trap("Passport HTTP response code " # Nat.toText(response.status))
-        }
+        };
         let ?body = Text.decodeUtf8(Blob.fromArray(response.body)) else {
             Debug.trap("scorer response is not UTF-8");
         };
