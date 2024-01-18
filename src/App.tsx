@@ -120,7 +120,7 @@ function App() {
     }
     const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID, {agent});
     try {
-      const result = await backend.scoreBySignedEthereumAddress({address, signature});
+      const result = await backend.scoreBySignedEthereumAddress({address: address!, signature: signature!});
       const j = JSON.parse(result);
       let score = j.score;
       setScore(/^\d+(\.\d+)/.test(score) ? score : 'retrieved-none');
