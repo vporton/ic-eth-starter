@@ -16,6 +16,7 @@ import { createActor as createBackendActor } from './declarations/backend'
 import config from './config.json';
 import ourCanisters from './our-canisters.json';
 import { HttpAgent } from '@dfinity/agent';
+import { ClipLoader } from 'react-spinners';
 
 const walletConnectOptions/*: WalletConnectOptions*/ = {
   projectId:
@@ -91,6 +92,8 @@ function App() {
   const [signature, setSignature] = useState<string>();
   const [address, setAddress] = useState<string>();
   const [score, setScore] = useState<number | 'didnt-read' | 'retrieved-none'>('didnt-read');
+  const [obtainScoreLoading, setObtainScoreLoading] = useState(false);
+  const [recalculateScoreLoading, setRecalculateScoreLoading] = useState(false);
 
   const [{ wallet, connecting }, connect, disconnect] = useConnectWallet();
 
@@ -111,36 +114,48 @@ function App() {
   }, [wallet]);
 
   async function obtainScore() {
-    const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any'); // TODO: duplicate code
-    const signer = await ethersProvider.getSigner();
-    if (!address || !signature) {
-      const { address, signature } = await scoreSignature(signer);
-      setAddress(address);
-      setSignature(signature);
-    }
-    const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID, {agent});
     try {
-      const result = await backend.scoreBySignedEthereumAddress({address: address!, signature: signature!});
-      const j = JSON.parse(result);
-      let score = j.score;
-      setScore(/^\d+(\.\d+)/.test(score) ? score : 'retrieved-none');
+      setObtainScoreLoading(true);
+      const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any'); // TODO: duplicate code
+      const signer = await ethersProvider.getSigner();
+      if (!address || !signature) {
+        const { address, signature } = await scoreSignature(signer);
+        setAddress(address);
+        setSignature(signature);
+      }
+      const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID, {agent});
+      try {
+        const result = await backend.scoreBySignedEthereumAddress({address: address!, signature: signature!});
+        const j = JSON.parse(result);
+        let score = j.score;
+        setScore(/^\d+(\.\d+)/.test(score) ? score : 'retrieved-none');
+      }
+      catch(_) {
+        setScore('retrieved-none');
+      }
     }
-    catch(_) {
-      setScore('retrieved-none');
+    finally {
+      setObtainScoreLoading(false);
     }
   }
 
   // TODO: Enable button only when all variables are true.
   async function recalculateScore() {
-    const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID, {agent}); // TODO: duplicate code
     try {
-      const result = await backend.submitSignedEthereumAddressForScore({address: address!, signature: signature!});
-      const j = JSON.parse(result);
-      let score = j.score;
-      setScore(/^\d+(\.\d+)?/.test(score) ? score : 'retrieved-none');
+      setRecalculateScoreLoading(true);
+      const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID, {agent}); // TODO: duplicate code
+      try {
+        const result = await backend.submitSignedEthereumAddressForScore({address: address!, signature: signature!});
+        const j = JSON.parse(result);
+        let score = j.score;
+        setScore(/^\d+(\.\d+)?/.test(score) ? score : 'retrieved-none');
+      }
+      catch(_) {
+        setScore('retrieved-none');
+      }
     }
-    catch(_) {
-      setScore('retrieved-none');
+    finally {
+      setRecalculateScoreLoading(false);
     }
 }
 
@@ -174,11 +189,13 @@ function App() {
             </li>
             <li>Check the score<br/>
               <Button disabled={!agent || !wallet} onClick={obtainScore}>Get you identity score</Button>
+              <ClipLoader loading={obtainScoreLoading}/>{' '}
             </li>
             <li>If needed,<br/>
               <Button disabled={!address || !signature || !agent || !wallet} onClick={recalculateScore}>
                 Recalculate your identity score
               </Button>
+              <ClipLoader loading={recalculateScoreLoading}/>{' '}
             </li>
           </ol>
           <p>Your identity score:{' '}
