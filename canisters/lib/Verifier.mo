@@ -146,6 +146,10 @@ module {
                 let #String score = e.1 else {
                     Debug.trap("Wrong JSON format");
                 };
+                // Someone claimed, that scorer returns `"0E-9"` if zero score:
+                if (score == "0E-9") {
+                    return 0.0;
+                };
                 return textToFloat(score);
             }
         };
@@ -161,7 +165,6 @@ module {
     };
 
     // adopted from https://forum.dfinity.org/t/how-to-convert-text-to-float/15982/2?u=qwertytrewq
-    // FIXME: Scorer returns `"0E-9"` if zero score.
     public func textToFloat(t: Text): Float {
         var i : Float = 1;
         var f : Float = 0;
