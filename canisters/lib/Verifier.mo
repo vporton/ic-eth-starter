@@ -19,6 +19,8 @@ import Config "../../Config";
 module {
     public type EthereumAddress = Blob;
 
+    let ic : Types.IC = actor ("aaaaa-aa"); // management canister
+
     func _toLowerHexDigit(v: Nat): Char {
         Char.fromNat32(Nat32.fromNat(
         if (v < 10) {
@@ -38,6 +40,21 @@ module {
         result;
     };
 
+    func obtainSuccessfulJSON(request: Types.HttpRequestArgs): async* JSON.JSON {
+        Cycles.add(20_000_000);
+        let response: Types.HttpResponsePayload = await ic.http_request(request);
+        if (response.status != 200) {
+            Debug.trap("Passport HTTP response code " # Nat.toText(response.status))
+        };
+        let ?body = Text.decodeUtf8(Blob.fromArray(response.body)) else {
+            Debug.trap("Passport response is not UTF-8");
+        };
+        let ?json = JSON.parse(body) else {
+            Debug.trap("Passport response is not JSON");
+        };
+        json;
+    };
+
     // FIXME: Add random nonce for more security.
     public func checkAddressOwner({address: Text; signature: Text}): async* () {
         let message = "I certify that I am the owner of the Ethereum account\n" # address;
@@ -52,8 +69,6 @@ module {
         scorerId: Nat;
         transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload;
     }): async* Float {
-        let ic : Types.IC = actor ("aaaaa-aa"); // management canister
-
         let request : Types.HttpRequestArgs = {
             body = null;
             headers = [{name = "X-API-KEY"; value = Config.scorerAPIKey}];
@@ -66,17 +81,7 @@ module {
             };
         };
 
-        Cycles.add(20_000_000);
-        let response: Types.HttpResponsePayload = await ic.http_request(request);
-        if (response.status != 200) {
-            Debug.trap("Passport HTTP response code " # Nat.toText(response.status))
-        };
-        let ?body = Text.decodeUtf8(Blob.fromArray(response.body)) else {
-            Debug.trap("scorer response is not UTF-8");
-        };
-        let ?json = JSON.parse(body) else {
-            Debug.trap("scorer response is not JSON");
-        };
+        let json = await* obtainSuccessfulJSON(request);
 
         let scoreOption = label b: ?Text {
             let #Object jsonObject = json else {
