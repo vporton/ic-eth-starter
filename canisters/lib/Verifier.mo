@@ -74,7 +74,6 @@ module {
         let ?body = Text.decodeUtf8(Blob.fromArray(response.body)) else {
             Debug.trap("scorer response is not UTF-8");
         };
-        Debug.print(body);
         let ?json = JSON.parse(body) else {
             Debug.trap("scorer response is not JSON");
         };
