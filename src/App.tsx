@@ -95,14 +95,23 @@ function App() {
   const [{ wallet, connecting }, connect, disconnect] = useConnectWallet();
 
   useEffect(() => {
-    if (!wallet) {
+    if (wallet) {
+      const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any'); // TODO: duplicate code
+      // This does not work:
+      // ethersProvider.on('accountsChanged', function (accounts) {
+      //   setAddress(accounts[0]);
+      // });
+      ethersProvider.send('eth_requestAccounts', []).then((accounts) => {
+        setAddress(accounts[0]);
+      });      
+    } else {
       setAddress(undefined);
       setSignature(undefined);
     }
   }, [wallet]);
 
   async function obtainScore() {
-    const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any');
+    const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any'); // TODO: duplicate code
     const signer = await ethersProvider.getSigner();
     const { address, signature } = await scoreSignature(signer);
     setAddress(address);
