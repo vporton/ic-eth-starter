@@ -90,6 +90,7 @@ function App() {
   }
 
   const [signature, setSignature] = useState<string>();
+  const [nonce, setNonce] = useState<string>();
   const [address, setAddress] = useState<string>();
   const [score, setScore] = useState<number | 'didnt-read' | 'retrieved-none'>('didnt-read');
   const [obtainScoreLoading, setObtainScoreLoading] = useState(false);
@@ -117,19 +118,24 @@ function App() {
     try {
       let localAddress = address;
       let localSignature = signature;
+      let localNonce = nonce;
       if (!address || !signature) {
         const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any'); // TODO: duplicate code
         const signer = await ethersProvider.getSigner();
-        const { address, signature } = await scoreSignature(signer);
+        const { address, signature, nonce } = await scoreSignature(signer);
         localAddress = address;
         localSignature = signature;
+        localNonce = nonce;
         setAddress(address);
         setSignature(signature);
+        setNonce(nonce);
       }
       setObtainScoreLoading(true);
       const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID, {agent});
       try {
-        const result = await backend.scoreBySignedEthereumAddress({address: localAddress!, signature: localSignature!});
+        const result = await backend.scoreBySignedEthereumAddress({
+          address: localAddress!, signature: localSignature!, nonce: localNonce!
+        });
         const j = JSON.parse(result);
         let score = j.score;
         setScore(/^\d+(\.\d+)/.test(score) ? Number(score) : 'retrieved-none');
@@ -150,7 +156,7 @@ function App() {
       setRecalculateScoreLoading(true);
       const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID, {agent}); // TODO: duplicate code
       try {
-        const result = await backend.submitSignedEthereumAddressForScore({address: address!, signature: signature!});
+        const result = await backend.submitSignedEthereumAddressForScore({address: address!, signature: signature!, nonce: nonce!});
         const j = JSON.parse(result);
         let score = j.score;
         setScore(/^\d+(\.\d+)?/.test(score) ? Number(score) : 'retrieved-none');

@@ -52,9 +52,9 @@ module {
         body;
     };
 
-    // FIXME: Add random nonce for more security.
-    public func checkAddressOwner({address: Text; signature: Text}): async* () {
-        let message = "I certify that I am the owner of the Ethereum account\n" # address;
+    public func checkAddressOwner({address: Text; signature: Text; nonce: Text}): async* () {
+        let message = "I am the owner of the Ethereum account\n" # address #
+            "\n\nwhich I certify by providing a random value:\n" # nonce;
         if (not(await ic_eth.verify_ecdsa(address, message, signature))) {
             Debug.trap("You are not the owner of the Ethereum account");
         };
@@ -83,10 +83,11 @@ module {
     public func scoreBySignedEthereumAddress({
         address: Text;
         signature: Text;
+        nonce: Text;
         scorerId: Nat;
         transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload;
     }): async* Text {
-        await* checkAddressOwner({address; signature});
+        await* checkAddressOwner({address; signature; nonce});
         await* scoreByEthereumAddress({address; scorerId; transform});
     };
 
@@ -123,10 +124,11 @@ module {
     public func submitSignedEthereumAddressForScore({
         address: Text;
         signature: Text;
+        nonce: Text;
         scorerId: Nat;
         transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload;
     }): async* Text {
-        await* checkAddressOwner({address; signature});
+        await* checkAddressOwner({address; signature; nonce});
         await* submitEthereumAddressForScore({address; scorerId; transform});
     };
 
