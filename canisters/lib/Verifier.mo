@@ -197,7 +197,7 @@ module {
                 let #String score = e.1 else {
                     Debug.trap("Wrong JSON format");
                 };
-                // Someone claimed, that scorer returns `"0E-9"` if zero score:
+                // Scorer returns `"0E-9"` if zero score:
                 if (score == "0E-9") {
                     return 0.0;
                 };

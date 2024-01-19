@@ -138,7 +138,8 @@ function App() {
         });
         const j = JSON.parse(result);
         let score = j.score;
-        setScore(/^\d+(\.\d+)/.test(score) ? Number(score) : 'retrieved-none');
+        // Scorer returns 0E-9 for zero.
+        setScore(/^\d+(\.\d+)?$|^0E-9$/.test(score) ? Number(score) : 'retrieved-none');
       }
       catch(e) {
         console.log(e);
