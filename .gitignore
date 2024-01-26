@@ -38,7 +38,7 @@ yarn-error.log*
 .dfx
 
 # declarations
-/src/declarations
+/frontend/declarations
 
 # Rust
 target/
