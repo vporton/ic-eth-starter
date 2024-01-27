@@ -81,10 +81,13 @@ const onboard = init({
 // - connect: ask for signature, store the signature, try to retrieve, show retrieval status
 // - recalculate: recalculate, show retrieval status
 function App() {
-  const agent = useMemo(() => new HttpAgent({}), []);
-  if (config.IS_LOCAL) {
-    agent.fetchRootKey();
-  }
+  const agent = useMemo(() => {
+    const agent = new HttpAgent({});
+    if (config.IS_LOCAL) {
+      agent.fetchRootKey();
+    }
+    return agent;
+  }, []);
 
   const [signature, setSignature] = useState<string>();
   const [message, setMessage] = useState<string>();
