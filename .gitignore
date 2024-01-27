@@ -19,6 +19,7 @@ node_modules/
 .DS_Store
 /.env
 config.json
+/Config.mo
 our-canisters.json
 .env.local
 .env.development.local
