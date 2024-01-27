@@ -9,8 +9,8 @@ node_modules/
 /coverage
 
 # production
-/dist
-/build
+/frontend/dist
+/frontend/build
 
 # local files
 /local

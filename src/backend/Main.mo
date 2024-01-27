@@ -1,6 +1,6 @@
 import Types "../lib/Types";
 import V "../lib/Verifier";
-import Conf "../Config";
+import Conf "../../Config";
 
 actor Main {
     public shared func scoreBySignedEthereumAddress({address: Text; signature: Text; nonce: Text;}): async Text {

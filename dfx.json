@@ -6,7 +6,7 @@
       "frontend": {
         "entrypoint": "dist/index.html"
       },
-      "source": ["build/"]
+      "source": ["frontend/build/"]
     },
     "backend": {
       "dependencies": ["ic_eth", "internet_identity"],
