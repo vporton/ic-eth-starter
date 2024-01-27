@@ -1,5 +1,5 @@
 "use strict";
-exports.__esModule = true;
+Object.defineProperty(exports, "__esModule", { value: true });
 var reportWebVitals = function (onPerfEntry) {
     if (onPerfEntry && onPerfEntry instanceof Function) {
         Promise.resolve().then(function () { return require('web-vitals'); }).then(function (_a) {
@@ -12,4 +12,4 @@ var reportWebVitals = function (onPerfEntry) {
         });
     }
 };
-exports["default"] = reportWebVitals;
+exports.default = reportWebVitals;

@@ -7,9 +7,10 @@ const CopyPlugin = require("copy-webpack-plugin");
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
+// console.log("XXX", __dirname);
 const frontendDirectory = ".";
 
-const frontend_entry = path.join(frontendDirectory, "index.html");
+const frontend_entry = path.join(/*"src", frontendDirectory,*/ "src", "index.html");
 
 module.exports = {
   target: "web",
@@ -17,7 +18,7 @@ module.exports = {
   entry: {
     // The frontend.entrypoint points to the HTML file for this build, so we need
     // to replace the extension to `.js`.
-    index: path.join(__dirname, "src", "index.tsx"),
+    index: path.join(__dirname, frontend_entry).replace(/\.html$/, ".tsx"),
   },
   devtool: isDevelopment ? "source-map" : false,
   optimization: {
@@ -45,10 +46,15 @@ module.exports = {
   // modules and CSS as described in the "Adding a stylesheet"
   // tutorial, uncomment the following lines:
   module: {
-   rules: [
-     { test: /\.(ts|tsx|jsx)$/, loader: "ts-loader" },
-     { test: /\.css$/, use: ['style-loader','css-loader'] }
-   ]
+    rules: [
+      { test: /\.(ts|tsx|jsx)$/, loader: "ts-loader" },
+      { test: /\.json$/, type: 'json' },    
+      { test: /\.css$/, use: ['style-loader','css-loader'] },
+      {
+        test: /\.(png|jpe?g|svg|gif)$/,
+        type: "asset/resource",
+      },
+    ],
   },
   plugins: [
     new HtmlWebpackPlugin({
@@ -59,6 +65,7 @@ module.exports = {
       ...Object.keys(process.env).filter((key) => {
         if (key.includes("CANISTER")) return true;
         if (key.includes("DFX")) return true;
+        if (key.includes("REACT_APP")) return true;
         return false;
       }),
     ]),
@@ -69,7 +76,7 @@ module.exports = {
     new CopyPlugin({
       patterns: [
         {
-          from: `${frontendDirectory}/src/.ic-assets.json*`,
+          from: `src/.ic-assets.json*`,
           to: ".ic-assets.json5",
           noErrorOnMissing: true,
         },
@@ -81,7 +88,7 @@ module.exports = {
   devServer: {
     proxy: {
       "/api": {
-        target: "http://127.0.0.1:4943",
+        target: "http://localhost:8000",
         changeOrigin: true,
         pathRewrite: {
           "^/api": "/api",
@@ -90,7 +97,7 @@ module.exports = {
     },
     static: path.resolve(__dirname, frontendDirectory, "assets"),
     hot: true,
-    watchFiles: [path.resolve(__dirname, frontendDirectory)],
+    watchFiles: [path.resolve(__dirname, frontendDirectory, "src")],
     liveReload: true,
   },
 };
