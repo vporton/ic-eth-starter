@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-    "src/ic_eth",
+    "canisters/ic_eth",
 ]
 
 [profile.release]
