@@ -1,7 +1,7 @@
 import os
 import json
 
-JSON_FILE = "src/our-canisters.json"
+JSON_FILE = "our-canisters.json"
 
 try:
     j = json.load(JSON_FILE)
