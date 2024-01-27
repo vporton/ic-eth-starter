@@ -6,8 +6,8 @@ all: frontend
 .PHONY: backend
 backend:
 	dfx deploy backend
-	dfx deploy internet_identity
 	dfx generate
+	ln -fs ../../src/declarations frontend/src/
 	env -i scripts/read-env.sh
 
 .PHONY: frontend

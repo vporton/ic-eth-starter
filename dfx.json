@@ -1,7 +1,7 @@
 {
   "canisters": {
     "frontend": {
-      "dependencies": ["backend", "internet_identity"],
+      "dependencies": ["backend"],
       "type": "assets",
       "frontend": {
         "entrypoint": "dist/index.html"
@@ -9,7 +9,7 @@
       "source": ["build/"]
     },
     "backend": {
-      "dependencies": ["ic_eth"],
+      "dependencies": ["ic_eth", "internet_identity"],
       "type": "motoko",
       "main": "src/backend/Main.mo"
     },

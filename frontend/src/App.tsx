@@ -11,9 +11,9 @@ import injectedModule from '@web3-onboard/injected-wallets'
 import { ethers } from 'ethers'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
-import { createActor as createBackendActor } from '../../src/declarations/backend';
-import config from '../../config.json';
-import ourCanisters from '../../our-canisters.json';
+import { createActor as createBackendActor } from './declarations/backend';
+import config from './config.json';
+import ourCanisters from './our-canisters.json';
 import { HttpAgent } from '@dfinity/agent';
 import { ClipLoader } from 'react-spinners';
 
