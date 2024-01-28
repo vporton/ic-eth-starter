@@ -7,10 +7,8 @@ The current version of this app requires use of an Ethereum wallet that you need
 ## Testing
 
 ```
-npm i
-npm run backend
-dfx deploy frontend
+make
 ```
 
-Running the app with `npm start` currently does not work as intended due to [a bug](https://github.com/dfinity/cdk-rs/issues/455).
+Running the app with `npm start` currently does not work as intended due to a bug.
 But you can open the URL of `frontend` printed by `dfx deploy frontend` to test the app on localhost.
