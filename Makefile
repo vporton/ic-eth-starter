@@ -7,7 +7,6 @@ all: frontend
 backend:
 	dfx deploy backend
 	dfx generate
-	ln -fs ../../src/declarations frontend/src/
 	env -i scripts/read-env.sh
 
 .PHONY: frontend
