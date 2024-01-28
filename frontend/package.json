@@ -1,6 +1,6 @@
 {
   "name": "frontend",
-  "private": true,
+  "private": false,
   "version": "0.2.0",
   "description": "Internet Computer starter application",
   "keywords": [
@@ -28,6 +28,7 @@
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.70",
     "@types/react": "^18.2.47",
+    "@types/react-bootstrap": "^0.32.35",
     "@types/react-dom": "^18.2.18",
     "@web3-onboard/core": "^2.21.2",
     "@web3-onboard/injected-wallets": "^2.10.11",
