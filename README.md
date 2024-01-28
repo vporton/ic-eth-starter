@@ -6,6 +6,8 @@ The current version of this app requires use of an Ethereum wallet that you need
 
 ## Testing
 
+Copy `X.example.Y` files to `X.Y` and edit them.
+
 ```
 make
 ```
