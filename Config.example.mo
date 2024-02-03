@@ -1,6 +1,9 @@
+import Config "src/lib/Verifier";
+
 module {
-    public let scorerId = <NUMBER>;
-    public let scorerAPIKey = "<KEY>";
-    public let scorerUrl = "https://api.scorer.gitcoin.co";
-    public let isLocal = true;
+    public let config: Config.Config = {
+        scorerId = <NUMBER>;
+        scorerAPIKey = "<KEY>";
+        scorerUrl = "https://api.scorer.gitcoin.co";
+    };
 }
