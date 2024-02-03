@@ -14,10 +14,15 @@ import ic_eth "canister:ic_eth";
 import Types "./Types";
 import JSON "mo:json.mo/JSON";
 import Parser "mo:parser-combinators/Parser";
-import Config "../../Config";
 
 module {
     public type EthereumAddress = Blob;
+
+    type Config = {
+        scorerId: Nat;
+        scorerAPIKey: Text; // "<KEY>"
+        scorerUrl: Text; // "https://api.scorer.gitcoin.co"
+    };
 
     let ic : Types.IC = actor ("aaaaa-aa"); // management canister
 
@@ -76,10 +81,10 @@ module {
     }): async* Text {
         let request : Types.HttpRequestArgs = {
             body = null;
-            headers = [{name = "X-API-KEY"; value = Config.scorerAPIKey}];
+            headers = [{name = "X-API-KEY"; value = config.scorerAPIKey}];
             max_response_bytes = ?10000;
             method = #get;
-            url = Config.scorerUrl # "/registry/score/" # Nat.toText(scorerId) # "/" # address;
+            url = config.scorerUrl # "/registry/score/" # Nat.toText(scorerId) # "/" # address;
             transform = ?{
                 function = transform;
                 context = Blob.fromArray([]);
@@ -115,12 +120,12 @@ module {
         let request : Types.HttpRequestArgs = {
             body = ?(Blob.toArray(Text.encodeUtf8(requestBody)));
             headers = [
-                {name = "X-API-KEY"; value = Config.scorerAPIKey},
+                {name = "X-API-KEY"; value = config.scorerAPIKey},
                 {name = "Content-Type"; value = "application/json"},
             ];
             max_response_bytes = ?10000;
             method = #post;
-            url = Config.scorerUrl # "/registry/submit-passport";
+            url = config.scorerUrl # "/registry/submit-passport";
             transform = ?{
                 function = transform;
                 context = Blob.fromArray([]);
@@ -135,11 +140,11 @@ module {
         let request : Types.HttpRequestArgs = {
             body = null;
             headers = [
-                {name = "X-API-KEY"; value = Config.scorerAPIKey},
+                {name = "X-API-KEY"; value = config.scorerAPIKey},
             ];
             max_response_bytes = ?10000;
             method = #get;
-            url = Config.scorerUrl # "/registry/signing-message";
+            url = config.scorerUrl # "/registry/signing-message";
             transform = ?{
                 function = transform;
                 context = Blob.fromArray([]);
