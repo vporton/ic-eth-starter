@@ -18,7 +18,7 @@
     "generate": "dfx generate backend"
   },
   "dependencies": {
-    "@dfinity/agent": "^0.20.2",
+    "@dfinity/agent": "^0.21.4",
     "@dfinity/candid": "^0.21.4",
     "@dfinity/principal": "^0.21.4",
     "@testing-library/jest-dom": "^5.17.0",
