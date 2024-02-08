@@ -1,6 +1,6 @@
 # DFINITY ICP Gitcoin Passport Client
 
-This is an example app (template repository) for DFINITY Internet Computer, that connects to [Gitcoin Passport](https://passport.gitcoin.co/) to prove user's personhood and uniqueness (for example, against so called "Sybil attack", that is when a user votes more than once).
+This is an example app (template repository) for DFINITY Internet Computer, that connects to [Gitcoin Passport](https://passport.gitcoin.co/) to prove user's personhood and uniqueness (for example, against so called "Sybil attack", that is when a user votes more than once). The repository contains among other a Motoko library that similar apps are recommended to use.
 
 It connects to Passport through an Ethereum signature and copies passport score into a DFINITY Internet Computer based app.
 Copying the score is secure (provided that Gitcoin Passport is secure), that is the score is guaranteed to accurately
