@@ -13,4 +13,4 @@ make
 ```
 
 Running the app with `npm start` currently does not work as intended due to a bug.
-But you can open the URL of `frontend` printed by `dfx deploy frontend` to test the app on localhost.
+But you can open the URL of `frontend` printed by `dfx deploy frontend` (called by `make`) to test the app on localhost.
