@@ -4,7 +4,7 @@
       "dependencies": ["backend"],
       "type": "assets",
       "frontend": {
-        "entrypoint": "dist/index.html"
+        "entrypoint": "frontend/dist/index.html"
       },
       "source": ["frontend/dist/"]
     },
