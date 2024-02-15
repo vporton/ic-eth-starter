@@ -1,12 +1,14 @@
 import Types "../lib/Types";
 import V "../lib/Verifier";
 import Config "../../Config";
+import ic_eth "canister:ic_eth";
 
 actor Main {
     public shared func scoreBySignedEthereumAddress({address: Text; signature: Text; nonce: Text}): async Text {
         // A real app would store the verified address somewhere instead of just returning the score to frontend.
         // Use `extractItemScoreFromBody` or `extractItemScoreFromJSON` to extract score.
         await* V.scoreBySignedEthereumAddress({
+            ic_eth;
             address;
             signature;
             nonce;
@@ -19,6 +21,7 @@ actor Main {
         // A real app would store the verified address somewhere instead of just returning the score to frontend.
         // Use `extractItemScoreFromBody` or `extractItemScoreFromJSON` to extract score.
         await* V.submitSignedEthereumAddressForScore({
+            ic_eth;
             address;
             signature;
             nonce;

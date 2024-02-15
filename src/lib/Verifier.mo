@@ -10,7 +10,6 @@ import Blob "mo:base/Blob";
 import Float "mo:base/Float";
 import Int64 "mo:base/Int64";
 import Nat64 "mo:base/Nat64";
-import ic_eth "canister:ic_eth";
 import Types "./Types";
 import JSON "mo:json.mo/JSON";
 import Parser "mo:parser-combinators/Parser";
@@ -65,7 +64,11 @@ module {
         json;
     };
 
-    public func checkAddressOwner({address: Text; signature: Text; nonce: Text}): async* () {
+    public type IC_ETH = actor {
+       verify_ecdsa: query(eth_address: Text, message: Text, Signature: Text) -> async Bool;
+    };
+
+    public func checkAddressOwner({ic_eth: IC_ETH; address: Text; signature: Text; nonce: Text}): async* () {
         // the same text as returned by `GET /registry/signing-message`
         let message = "I hereby agree to submit my address in order to score my associated Gitcoin Passport from Ceramic.\n\nNonce: "
             # nonce # "\n";
@@ -94,13 +97,14 @@ module {
     };
 
     public func scoreBySignedEthereumAddress({
+        ic_eth: IC_ETH;
         address: Text;
         signature: Text;
         nonce: Text;
         transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload;
         config: Config;
     }): async* Text {
-        await* checkAddressOwner({address; signature; nonce});
+        await* checkAddressOwner({ic_eth; address; signature; nonce});
         await* scoreByEthereumAddress({address; transform; config});
     };
 
@@ -177,13 +181,14 @@ module {
    };
 
     public func submitSignedEthereumAddressForScore({
+        ic_eth: IC_ETH;
         address: Text;
         signature: Text;
         nonce: Text;
         transform: shared query Types.TransformArgs -> async Types.HttpResponsePayload;
         config: Config;
     }): async* Text {
-        await* checkAddressOwner({address; signature; nonce});
+        await* checkAddressOwner({ic_eth; address; signature; nonce});
         await* submitEthereumAddressForScore({address; transform; config});
     };
 
