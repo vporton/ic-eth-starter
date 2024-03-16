@@ -136,11 +136,9 @@ function App() {
           localSignature = signature;
           setSignature(localSignature);
         }
-        const result = await backend.scoreBySignedEthereumAddress({
+        const { personIdPrincipal, personPrincipal, score } = await backend.scoreBySignedEthereumAddress({
           address: address!, signature: localSignature!, nonce: localNonce!
         });
-        const j = JSON.parse(result);
-        let score = j.score;
         // Scorer returns 0E-9 for zero.
         setScore(/^\d+(\.\d+)?$|^0E-9$/.test(score) ? Number(score) : 'retrieved-none');
       }
@@ -160,14 +158,12 @@ function App() {
       setRecalculateScoreLoading(true);
       const backend = createBackendActor(ourCanisters.CANISTER_ID_BACKEND, {agent}); // TODO: duplicate code
       try {
-        const result = await backend.submitSignedEthereumAddressForScore({address: address!, signature: signature!, nonce: nonce!});
-        const j = JSON.parse(result);
-        let score = j.score;
+        const { personIdPrincipal, personPrincipal, score } = await backend.submitSignedEthereumAddressForScore({address: address!, signature: signature!, nonce: nonce!});
         setScore(/^\d+(\.\d+)?/.test(score) ? Number(score) : 'retrieved-none');
       }
       catch(e) {
         setScore('retrieved-none');
-        alert(e)
+        alert(e);
       }
     }
     finally {
