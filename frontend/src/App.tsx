@@ -104,7 +104,7 @@ function App() {
 
   useEffect(() => {
     const storagePrincipal = localStorage.getItem('person:storagePrincipal');
-    const part = createCanDBPartitionActor(storagePrincipal, {agent}); // TODO: duplicate code
+    const part = createCanDBPartitionActor(storagePrincipal, {agent});
     const user = part.getUser(principal);
     setScore(user.personhoodScore);
   });
