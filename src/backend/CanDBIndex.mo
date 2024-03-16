@@ -187,15 +187,8 @@ shared({caller = initialOwner}) actor class () = this {
 
   // Personhood //
 
-  let personStorage = {
-    personIdPrefix = "ui/";
-    personIdSubkey = "u";
-    personPrincipalPrefix = "up/";
-    personPrincipalSubkey = "u";
-  };
-
   public shared({caller}) func storePersonhood(hint: ?Principal, score: Float, ethereumAddress: Text)
-    : async { personIdPrincipal: Principal; personPrincipal: Principal }
+    : async { personIdPrincipal: Principal; personStoragePrincipal: Principal }
   {
     let user = {
       principal = caller;
@@ -209,9 +202,9 @@ shared({caller = initialOwner}) actor class () = this {
       pk = "user";
       hint;
       personId = user.personhoodEthereumAddress;
-      personPrincipal = user.principal;
+      personStoragePrincipal = user.principal;
       userInfo = userEntity;
-      storage = personStorage;
+      storage = lib.personStorage;
     });
   };
 }

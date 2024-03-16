@@ -22,10 +22,10 @@ module {
         pk: E.PK;
         hint: ?Principal;
         personId: Text;
-        personPrincipal: Principal;
+        personStoragePrincipal: Principal;
         userInfo: E.AttributeValue;
         storage: PersonStorage;
-    }) : async* { personIdPrincipal: Principal; personPrincipal: Principal } {
+    }) : async* { personIdPrincipal: Principal; personStoragePrincipal: Principal } {
         // TODO: Order of the next two operations?
         // NoDuplicates, because it cannot be more than one personhood with a given address.
         let personIdResult = await* Multi.putAttributeNoDuplicates(
@@ -44,11 +44,11 @@ module {
             pk,
             hint,
             {
-                sk = storage.personPrincipalPrefix # Principal.toText(personPrincipal);
+                sk = storage.personPrincipalPrefix # Principal.toText(personStoragePrincipal);
                 subkey = storage.personPrincipalSubkey;
                 value = #text personId;
             },
         );
-        { personIdPrincipal = personIdResult; personPrincipal = personPrincipalResult };
+        { personIdPrincipal = personIdResult; personStoragePrincipal = personPrincipalResult };
     }
 }

@@ -8,16 +8,16 @@ import CanDBIndex "canister:CanDBIndex";
 actor {
     /// Called upon receipt of personhood from Gitcoin.
     func processPersonhood(body: Text, hint: ?Principal, ethereumAddress: Text)
-        : async* { score: Float; personIdPrincipal: Principal; personPrincipal: Principal }
+        : async* { score: Float; personIdPrincipal: Principal; personStoragePrincipal: Principal }
     {
         let score = V.extractItemScoreFromBody(body);
-        let { personIdPrincipal; personPrincipal } = await CanDBIndex.storePersonhood(hint, score, ethereumAddress);
-        { score; personIdPrincipal; personPrincipal };
+        let { personIdPrincipal; personStoragePrincipal } = await CanDBIndex.storePersonhood(hint, score, ethereumAddress);
+        { score; personIdPrincipal; personStoragePrincipal };
     };
 
     public shared func scoreBySignedEthereumAddress({address: Text; signature: Text; nonce: Text; oldHint: ?Principal}): async {
         personIdPrincipal: Principal;
-        personPrincipal: Principal;
+        personStoragePrincipal: Principal;
         score: Float
     } {
         // A real app would store the verified address somewhere instead of just returning the score to frontend.
@@ -35,7 +35,7 @@ actor {
 
     public shared func submitSignedEthereumAddressForScore({address: Text; signature: Text; nonce: Text; oldHint: ?Principal}): async {
         personIdPrincipal: Principal;
-        personPrincipal: Principal;
+        personStoragePrincipal: Principal;
         score : Float
     } {
         // A real app would store the verified address somewhere instead of just returning the score to frontend.

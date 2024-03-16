@@ -12,10 +12,12 @@ import { ethers } from 'ethers'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './App.css';
 import { createActor as createBackendActor } from './declarations/backend';
+import { createActor as createCanDBPartitionActor } from './declarations/CanDBPartition';
 import config from './config.json';
 import ourCanisters from './our-canisters.json';
 import { HttpAgent } from '@dfinity/agent';
 import { ClipLoader } from 'react-spinners';
+import { Principal } from '@dfinity/candid/lib/cjs/idl';
 
 const walletConnectOptions/*: WalletConnectOptions*/ = {
   projectId:
@@ -96,11 +98,19 @@ function App() {
   const [score, setScore] = useState<number | 'didnt-read' | 'retrieved-none'>('didnt-read');
   const [obtainScoreLoading, setObtainScoreLoading] = useState(false);
   const [recalculateScoreLoading, setRecalculateScoreLoading] = useState(false);
+  const [principal, setPrincipal] = useState<string | undefined>();
 
   const [{ wallet, connecting }, connect, disconnect] = useConnectWallet();
 
   useEffect(() => {
-    if (wallet) {
+    const storagePrincipal = localStorage.getItem('person:storagePrincipal');
+    const part = createCanDBPartitionActor(storagePrincipal, {agent}); // TODO: duplicate code
+    const user = part.getUser(principal);
+    setScore(user.personhoodScore);
+  });
+
+  useEffect(() => {
+      if (wallet) {
       const ethersProvider = new ethers.BrowserProvider(wallet!.provider, 'any'); // TODO: duplicate code
       // This does not work:
       // ethersProvider.on('accountsChanged', function (accounts) {
@@ -108,11 +118,17 @@ function App() {
       // });
       ethersProvider.send('eth_requestAccounts', []).then((accounts) => {
         setAddress(accounts[0]);
-      });      
+      });
     } else {
       setAddress(undefined);
     }
   }, [wallet]);
+
+  async function storePerson({ personIdPrincipal, personStoragePrincipal, score }) {
+    // Scorer returns 0E-9 for zero.
+    setScore(/^\d+(\.\d+)?$|^0E-9$/.test(score.toString()) ? Number(score) : 'retrieved-none');
+    localStorage.setItem('person:storagePrincipal', personStoragePrincipal);
+  }
 
   async function obtainScore() {
     try {
@@ -136,11 +152,10 @@ function App() {
           localSignature = signature;
           setSignature(localSignature);
         }
-        const { personIdPrincipal, personPrincipal, score } = await backend.scoreBySignedEthereumAddress({
-          address: address!, signature: localSignature!, nonce: localNonce!
+        const res = await backend.scoreBySignedEthereumAddress({
+          address: address!, signature: localSignature!, nonce: localNonce!, oldHint: [],
         });
-        // Scorer returns 0E-9 for zero.
-        setScore(/^\d+(\.\d+)?$|^0E-9$/.test(score) ? Number(score) : 'retrieved-none');
+        storePerson(res);
       }
       catch(e) {
         console.log(e);
@@ -158,9 +173,10 @@ function App() {
       setRecalculateScoreLoading(true);
       const backend = createBackendActor(ourCanisters.CANISTER_ID_BACKEND, {agent}); // TODO: duplicate code
       try {
-        const { personIdPrincipal, personPrincipal, score } = await backend.submitSignedEthereumAddressForScore({address: address!, signature: signature!, nonce: nonce!});
-        // Scorer returns 0E-9 for zero.
-        setScore(/^\d+(\.\d+)?/.test(score) ? Number(score) : 'retrieved-none');
+        const res = await backend.submitSignedEthereumAddressForScore({
+          address: address!, signature: signature!, nonce: nonce!, oldHint: [],
+        });
+        storePerson(res);
       }
       catch(e) {
         setScore('retrieved-none');

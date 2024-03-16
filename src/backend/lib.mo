@@ -1,8 +1,16 @@
 import Time "mo:base/Time";
 import Principal "mo:base/Principal";
+import Debug "mo:base/Debug";
 import E "mo:candb/Entity";
 
 module {
+  public let personStorage = {
+    personIdPrefix = "ui/";
+    personIdSubkey = "u";
+    personPrincipalPrefix = "up/";
+    personPrincipalSubkey = "u";
+  };
+
   public type User = {
     principal: Principal;
     personhoodScore: Float;
@@ -20,4 +28,56 @@ module {
   };
 
 
+  public func deserializeUser(attr: E.AttributeValue): User {
+    var principal = Principal.fromText("");
+    var score = 0.0;
+    var pos = 0;
+    var date = +0;
+    var address = "";
+    let res = label r: Bool {
+      switch (attr) {
+        case (#tuple attr) {
+          switch (attr[pos]) {
+            case (#text v) {
+              principal := Principal.fromText(v);
+              pos += 1;
+            };
+            case _ { break r false; };
+          };
+          switch (attr[pos]) {
+            case (#float v) {
+              score := v;
+              pos += 1;
+            };
+            case _ { break r false; };
+          };
+          switch (attr[pos]) {
+            case (#int v) {
+              date := v;
+              pos += 1;
+            };
+            case _ { break r false; };
+          };
+          switch (attr[pos]) {
+            case (#text v) {
+              address := v;
+              pos += 1;
+            };
+            case _ { break r false; };
+          };
+        };
+        case _ { break r false };
+      };
+      true;
+    };
+    if (not res) {
+      Debug.trap("wrong user format");
+    };
+    {
+      principal;
+      personhoodScore = score;
+      personhoodDate = date;
+      personhoodEthereumAddress = address;
+    };
+  };
 }

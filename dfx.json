@@ -18,6 +18,10 @@
       "type": "motoko",
       "main": "src/backend/CanDBIndex.mo"
     },
+    "CanDBPartition": {
+      "main": "src/backend/CanDBPartition.mo",
+      "type": "motoko"
+    },
     "ic_eth": {
       "type": "rust",
       "candid": "src/ic_eth/ic_eth.did",
