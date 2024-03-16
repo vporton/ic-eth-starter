@@ -159,6 +159,7 @@ function App() {
       const backend = createBackendActor(ourCanisters.CANISTER_ID_BACKEND, {agent}); // TODO: duplicate code
       try {
         const { personIdPrincipal, personPrincipal, score } = await backend.submitSignedEthereumAddressForScore({address: address!, signature: signature!, nonce: nonce!});
+        // Scorer returns 0E-9 for zero.
         setScore(/^\d+(\.\d+)?/.test(score) ? Number(score) : 'retrieved-none');
       }
       catch(e) {
