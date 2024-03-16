@@ -9,9 +9,14 @@
       "source": ["frontend/dist/"]
     },
     "backend": {
-      "dependencies": ["ic_eth", "internet_identity"],
+      "dependencies": ["ic_eth", "internet_identity", "CanDBIndex"],
       "type": "motoko",
       "main": "src/backend/Main.mo"
+    },
+    "CanDBIndex": {
+      "dependencies": [],
+      "type": "motoko",
+      "main": "src/backend/CanDBIndex.mo"
     },
     "ic_eth": {
       "type": "rust",

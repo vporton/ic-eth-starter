@@ -2,7 +2,6 @@ import Cycles "mo:base/ExperimentalCycles";
 import Debug "mo:base/Debug";
 import Char "mo:base/Char";
 import Nat32 "mo:base/Nat32";
-import Nat8 "mo:base/Nat8";
 import Text "mo:base/Text";
 import Bool "mo:base/Bool";
 import Nat "mo:base/Nat";
@@ -12,7 +11,6 @@ import Int64 "mo:base/Int64";
 import Nat64 "mo:base/Nat64";
 import Types "./Types";
 import JSON "mo:json.mo/JSON";
-import Parser "mo:parser-combinators/Parser";
 
 module {
     public type EthereumAddress = Blob;
@@ -25,27 +23,8 @@ module {
 
     let ic : Types.IC = actor ("aaaaa-aa"); // management canister
 
-    func _toLowerHexDigit(v: Nat): Char {
-        Char.fromNat32(Nat32.fromNat(
-            if (v < 10) {
-                Nat32.toNat(Char.toNat32('0')) + v;
-            } else {
-                Nat32.toNat(Char.toNat32('a')) + v - 10;
-            }
-        ));
-    };
-
-    func encodeHex(g: Blob): Text {
-        var result = "";
-        for (b in g.vals()) {
-            let b2 = Nat8.toNat(b);
-                result #= Text.fromChar(_toLowerHexDigit(b2 / 16)) # Text.fromChar(_toLowerHexDigit(b2 % 16));
-            };
-        result;
-    };
-
     func obtainSuccessfulResponse(request: Types.HttpRequestArgs): async* Text {
-        Cycles.add(20_000_000);
+        Cycles.add<system>(20_000_000);
         let response: Types.HttpResponsePayload = await ic.http_request(request);
         if (response.status != 200) {
             Debug.trap("Passport HTTP response code " # Nat.toText(response.status))

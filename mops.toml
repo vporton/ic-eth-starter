@@ -1,4 +1,8 @@
 [dependencies]
-base = "0.9.3"
+base = "0.11.0"
 sequence = "https://github.com/matthewhammer/motoko-sequence#366c419"
 "json.mo" = "https://github.com/aviate-labs/json.mo#master@afd30ed75095cb339c1ec187d61030bbd2e59ae6"
+candb = "1.0.7"
+candb-multi = "0.11.0"
+stable-buffer = "1.0.1"
+StableBuffer = "https://github.com/skilesare/StableBuffer#v0.2.0@110660769d11ba93c618dc4712525d20503bdc37"

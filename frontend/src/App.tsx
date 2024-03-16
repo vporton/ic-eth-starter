@@ -120,7 +120,7 @@ function App() {
         setObtainScoreLoading(true);
         let localMessage = message;
         let localNonce = nonce;
-        const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID, {agent}); // TODO: duplicate code
+        const backend = createBackendActor(ourCanisters.CANISTER_ID_BACKEND, {agent}); // TODO: duplicate code
         if (nonce === undefined) {
           const {message, nonce} = await backend.getEthereumSigningMessage();
           localMessage = message;
@@ -158,7 +158,7 @@ function App() {
   async function recalculateScore() {
     try {
       setRecalculateScoreLoading(true);
-      const backend = createBackendActor(ourCanisters.BACKEND_CANISTER_ID, {agent}); // TODO: duplicate code
+      const backend = createBackendActor(ourCanisters.CANISTER_ID_BACKEND, {agent}); // TODO: duplicate code
       try {
         const result = await backend.submitSignedEthereumAddressForScore({address: address!, signature: signature!, nonce: nonce!});
         const j = JSON.parse(result);

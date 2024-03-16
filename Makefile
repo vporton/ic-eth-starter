@@ -6,7 +6,7 @@ all: frontend
 .PHONY: backend
 backend:
 	dfx deploy backend
-	dfx generate
+	dfx generate backend
 	env -i scripts/read-env.sh
 
 .PHONY: frontend
