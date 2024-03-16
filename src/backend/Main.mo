@@ -1,11 +1,8 @@
 import Types "../lib/Types";
 import V "../lib/Verifier";
-import DB "../lib/DB";
 import Config "../../Config";
 import ic_eth "canister:ic_eth";
-import Time "mo:base/Time";
 import Principal "mo:base/Principal";
-import E "mo:candb/Entity";
 import CanDBIndex "canister:CanDBIndex";
 
 actor {
@@ -18,7 +15,7 @@ actor {
         { score; personIdPrincipal; personPrincipal };
     };
 
-    public shared({caller}) func scoreBySignedEthereumAddress({address: Text; signature: Text; nonce: Text; oldHint: ?Principal}): async {
+    public shared func scoreBySignedEthereumAddress({address: Text; signature: Text; nonce: Text; oldHint: ?Principal}): async {
         personIdPrincipal: Principal;
         personPrincipal: Principal;
         score: Float
@@ -33,10 +30,10 @@ actor {
             transform = removeHTTPHeaders;
             config = Config.config;
         });
-        await* processPersonhood(oldHint, address);
+        await* processPersonhood(body, oldHint, address);
     };
 
-    public shared({caller}) func submitSignedEthereumAddressForScore({address: Text; signature: Text; nonce: Text}): async {
+    public shared func submitSignedEthereumAddressForScore({address: Text; signature: Text; nonce: Text; oldHint: ?Principal}): async {
         personIdPrincipal: Principal;
         personPrincipal: Principal;
         score : Float
@@ -51,7 +48,7 @@ actor {
             transform = removeHTTPHeaders;
             config = Config.config;
         });
-        await* processPersonhood(body, caller);
+        await* processPersonhood(body, oldHint, address);
     };
 
     public shared func getEthereumSigningMessage(): async {message: Text; nonce: Text} {

@@ -1,7 +1,6 @@
 import CA "mo:candb/CanisterActions";
 import Entity "mo:candb/Entity";
 import CanDB "mo:candb/CanDB";
-import Principal "mo:base/Principal";
 import Bool "mo:base/Bool";
 import Text "mo:base/Text";
 
@@ -16,8 +15,8 @@ shared actor class CanDBPartition(options: {
     btreeOrder = null;
   });
 
-  public shared({caller}) func setOwners(_owners: [Principal]): async () {
-  };
+  // public shared({caller}) func setOwners(_owners: [Principal]): async () {
+  // };
 
   /// @recommended (not required) public API
   public query func getPK(): async Text { db.pk };
@@ -31,13 +30,13 @@ shared actor class CanDBPartition(options: {
     CanDB.get(db, options);
   };
 
-  public shared({caller}) func put(options: CanDB.PutOptions): async () {
+  public shared func put(options: CanDB.PutOptions): async () {
     // In real software check access here.
 
     await* CanDB.put(db, options);
   };
 
-  public shared({caller}) func delete(options: CanDB.DeleteOptions): async () {
+  public shared func delete(options: CanDB.DeleteOptions): async () {
     // In real software check access here.
 
     CanDB.delete(db, options);

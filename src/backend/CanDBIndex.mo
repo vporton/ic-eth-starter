@@ -1,8 +1,6 @@
-import RBT "mo:stable-rbtree/StableRBTree";
 import Cycles "mo:base/ExperimentalCycles";
 import Debug "mo:base/Debug";
 import Text "mo:base/Text";
-import TrieSet "mo:base/TrieSet";
 import CA "mo:candb/CanisterActions";
 import Utils "mo:candb/Utils";
 import CanisterMap "mo:candb/CanisterMap";
@@ -10,19 +8,11 @@ import Buffer "mo:StableBuffer/StableBuffer";
 import CanDBPartition "CanDBPartition";
 import Admin "mo:candb/CanDBAdmin";
 import Principal "mo:base/Principal";
-import Hash "mo:base/Hash";
-import Array "mo:base/Array";
-import Int "mo:base/Int";
-import Iter "mo:base/Iter";
 import Time "mo:base/Time";
-import CanDB "mo:candb/CanDB";
-import Multi "mo:candb-multi/Multi";
-import Entity "mo:candb/Entity";
-import Canister "mo:matchers/Canister";
 import DB "../lib/DB";
 import lib "lib";
 
-shared({caller = initialOwner}) actor class CanDBIndex() = this {
+shared({caller = initialOwner}) actor class () = this {
   stable var initialized: Bool = false;
 
   stable var owners: [Principal] = [];
@@ -54,7 +44,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
   /// Get all canisters for an specific PK
   ///
   /// This method is called often by the candb-client query & update methods. 
-  public shared query({caller}) func getCanistersByPK(pk: Text): async [Text] {
+  public shared query func getCanistersByPK(pk: Text): async [Text] {
     getCanisterIdsIfExists(pk);
   };
   
@@ -73,7 +63,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
   ///
   /// If the developer does not spin up an additional User canister in the same partition within this method, auto-scaling will NOT work
   /// Upgrade user canisters in a PK range, i.e. rolling upgrades (limit is fixed at upgrading the canisters of 5 PKs per call)
-  public shared({caller}) func upgradeAllPartitionCanisters(wasmModule: Blob): async Admin.UpgradePKRangeResult {
+  public shared func upgradeAllPartitionCanisters(wasmModule: Blob): async Admin.UpgradePKRangeResult {
     // In real software check access here.
 
     await Admin.upgradeCanistersInPKRange({
@@ -105,7 +95,7 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
     // Pre-load 300 billion cycles for the creation of a new storage canister
     // Note that canister creation costs 100 billion cycles, meaning there are 200 billion
     // left over for the new canister when it is created
-    Cycles.add(210_000_000_000); // TODO: Choose the number.
+    Cycles.add<system>(210_000_000_000); // TODO: Choose the number.
     let newStorageCanister = await CanDBPartition.CanDBPartition({
       partitionKey = pk;
       scalingOptions = {
@@ -134,66 +124,66 @@ shared({caller = initialOwner}) actor class CanDBIndex() = this {
 
   // Private functions for getting canisters //
 
-  func lastCanister(pk: Entity.PK): async* CanDBPartition.CanDBPartition {
-    let canisterIds = getCanisterIdsIfExists(pk);
-    let part0 = if (canisterIds == []) {
-      await* createStorageCanister(pk, ownersOrSelf());
-    } else {
-      canisterIds[canisterIds.size() - 1];
-    };
-    actor(part0);
-  };
+  // func lastCanister(pk: Entity.PK): async* CanDBPartition.CanDBPartition {
+  //   let canisterIds = getCanisterIdsIfExists(pk);
+  //   let part0 = if (canisterIds == []) {
+  //     await* createStorageCanister(pk, ownersOrSelf());
+  //   } else {
+  //     canisterIds[canisterIds.size() - 1];
+  //   };
+  //   actor(part0);
+  // };
 
-  func getExistingCanister(pk: Entity.PK, options: CanDB.GetOptions, hint: ?Principal): async* ?CanDBPartition.CanDBPartition {
-    switch (hint) {
-      case (?hint) {
-        let canister: CanDBPartition.CanDBPartition = actor(Principal.toText(hint));
-        if (await canister.skExists(options.sk)) {
-          return ?canister;
-        } else {
-          Debug.trap("wrong DB partition hint");
-        };
-      };
-      case null {};
-    };
+  // func getExistingCanister(pk: Entity.PK, options: CanDB.GetOptions, hint: ?Principal): async* ?CanDBPartition.CanDBPartition {
+  //   switch (hint) {
+  //     case (?hint) {
+  //       let canister: CanDBPartition.CanDBPartition = actor(Principal.toText(hint));
+  //       if (await canister.skExists(options.sk)) {
+  //         return ?canister;
+  //       } else {
+  //         Debug.trap("wrong DB partition hint");
+  //       };
+  //     };
+  //     case null {};
+  //   };
 
-    // Do parallel search in existing canisters:
-    let canisterIds = getCanisterIdsIfExists(pk);
-    let threads : [var ?(async())] = Array.init(canisterIds.size(), null);
-    var foundInCanister: ?Nat = null;
-    for (threadNum in threads.keys()) {
-      threads[threadNum] := ?(async {
-        let canister: CanDBPartition.CanDBPartition = actor(canisterIds[threadNum]);
-        switch (foundInCanister) {
-          case (?foundInCanister) {
-            if (foundInCanister < threadNum) {
-              return; // eliminate unnecessary work.
-            };
-          };
-          case null {};
-        };
-        if (await canister.skExists(options.sk)) {
-          foundInCanister := ?threadNum;
-        };
-      });
-    };
-    for (topt in threads.vals()) {
-      let ?t = topt else {
-        Debug.trap("programming error: threads");
-      };
-      await t;
-    };
+  //   // Do parallel search in existing canisters:
+  //   let canisterIds = getCanisterIdsIfExists(pk);
+  //   let threads : [var ?(async())] = Array.init(canisterIds.size(), null);
+  //   var foundInCanister: ?Nat = null;
+  //   for (threadNum in threads.keys()) {
+  //     threads[threadNum] := ?(async {
+  //       let canister: CanDBPartition.CanDBPartition = actor(canisterIds[threadNum]);
+  //       switch (foundInCanister) {
+  //         case (?foundInCanister) {
+  //           if (foundInCanister < threadNum) {
+  //             return; // eliminate unnecessary work.
+  //           };
+  //         };
+  //         case null {};
+  //       };
+  //       if (await canister.skExists(options.sk)) {
+  //         foundInCanister := ?threadNum;
+  //       };
+  //     });
+  //   };
+  //   for (topt in threads.vals()) {
+  //     let ?t = topt else {
+  //       Debug.trap("programming error: threads");
+  //     };
+  //     await t;
+  //   };
 
-    switch (foundInCanister) {
-      case (?foundInCanister) {
-        ?(actor(canisterIds[foundInCanister]): CanDBPartition.CanDBPartition);
-      };
-      case null {
-        let newStorageCanisterId = await* createStorageCanister(pk, ownersOrSelf());
-        ?(actor(newStorageCanisterId): CanDBPartition.CanDBPartition);
-      };
-    };
-  };
+  //   switch (foundInCanister) {
+  //     case (?foundInCanister) {
+  //       ?(actor(canisterIds[foundInCanister]): CanDBPartition.CanDBPartition);
+  //     };
+  //     case null {
+  //       let newStorageCanisterId = await* createStorageCanister(pk, ownersOrSelf());
+  //       ?(actor(newStorageCanisterId): CanDBPartition.CanDBPartition);
+  //     };
+  //   };
+  // };
 
   // Personhood //
 
