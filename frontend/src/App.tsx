@@ -186,7 +186,7 @@ function App() {
     finally {
       setRecalculateScoreLoading(false);
     }
-}
+  }
 
   return (
     <div className="App">
