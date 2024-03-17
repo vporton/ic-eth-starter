@@ -192,6 +192,7 @@ shared({caller = initialOwner}) actor class () = this {
     personStoragePrincipal: ?Principal;
     personIdStoragePrincipal: ?Principal;
     score: Float;
+    time: Time.Time;
     ethereumAddress: Text;
   }) : async { personIdStoragePrincipal: Principal; personStoragePrincipal: Principal }
   {
@@ -200,7 +201,7 @@ shared({caller = initialOwner}) actor class () = this {
     let user = {
       principal = caller;
       personhoodScore = score;
-      personhoodDate = Time.now();
+      personhoodDate = time;
       personhoodEthereumAddress = ethereumAddress;
     };
     let userEntity = lib.serializeUser(user);

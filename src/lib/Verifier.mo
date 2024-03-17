@@ -9,8 +9,10 @@ import Blob "mo:base/Blob";
 import Float "mo:base/Float";
 import Int64 "mo:base/Int64";
 import Nat64 "mo:base/Nat64";
+import Time "mo:base/Time";
 import Types "./Types";
 import JSON "mo:json.mo/JSON";
+import Date "mo:date.mo/Date";
 
 module {
     public type EthereumAddress = Blob;
@@ -192,6 +194,28 @@ module {
                     return 0.0;
                 };
                 return textToFloat(score);
+            }
+        };
+        Debug.trap("No score");
+    };
+
+    public func extractDateFromBody(body: Text): Time.Time {
+        let ?json = JSON.parse(body) else {
+            Debug.trap("Passport response is not JSON");
+        };
+        extractItemScoreFromJSON(json);
+    };
+
+    public func extractDateFromJSON(json: JSON.JSON): Time.Time {
+        let #Object obj = json else {
+            Debug.trap("Wrong JSON format");
+        };
+        for (e in obj.vals()) {
+            if (e.0 == "last_score_timestamp") {
+                let #String time = e.1 else {
+                    Debug.trap("Wrong JSON format");
+                };
+                return Date.Date.fromIsoFormat(time);
             }
         };
         Debug.trap("No score");

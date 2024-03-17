@@ -41,7 +41,6 @@ module {
             },
         );
         // NoDuplicates, because there can't be more than one user with a given principal.
-        Debug.print("storePersonhood: sk = " # storage.personPrincipalPrefix # Principal.toText(personPrincipal)); // FIXME: Remove.
         let personPrincipalResult = await* Multi.putAttributeNoDuplicates(
             map,
             pk,

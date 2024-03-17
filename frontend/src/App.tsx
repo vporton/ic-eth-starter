@@ -129,6 +129,7 @@ function AppInternal2({agent, isAuthenticated, principal, login, logout}: {
   const [nonce, setNonce] = useState<string>();
   const [address, setAddress] = useState<string>();
   const [score, setScore] = useState<number | 'didnt-read' | 'retrieved-none'>('didnt-read');
+  const [time, setTime] = useState<number | undefined>(undefined);
   const [obtainScoreLoading, setObtainScoreLoading] = useState(false);
   const [recalculateScoreLoading, setRecalculateScoreLoading] = useState(false);
 
@@ -140,6 +141,7 @@ function AppInternal2({agent, isAuthenticated, principal, login, logout}: {
       const part = createCanDBPartitionActor(storagePrincipal, {agent: agent});
       part.getPersonhood({sk: principal.toText()}).then(user => {
         setScore(user.personhoodScore);
+        setTime(user.personhoodDate);
       });
     }
   }, [principal, agent]);
@@ -159,9 +161,10 @@ function AppInternal2({agent, isAuthenticated, principal, login, logout}: {
     }
   }, [wallet]);
 
-  async function storePerson({ personIdStoragePrincipal, personStoragePrincipal, score }) {
+  async function storePerson({ personIdStoragePrincipal, personStoragePrincipal, score, time }) {
     // Scorer returns 0E-9 for zero.
     setScore(/^\d+(\.\d+)?$|^0E-9$/.test(score.toString()) ? Number(score) : 'retrieved-none');
+    setTime(time);
     localStorage.setItem('person:storagePrincipal', personStoragePrincipal);
   }
 
@@ -287,6 +290,7 @@ function AppInternal2({agent, isAuthenticated, principal, login, logout}: {
             ? '(Congratulations: You\'ve been verified.)'
             : '(Sorry: It\'s <20, you are considered a bot.)'}`}
         </p>
+        <p>Your score time: {time}</p>
       </Row>
     </Container>
   </div>;

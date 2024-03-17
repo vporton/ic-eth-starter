@@ -3,6 +3,7 @@ import V "../lib/Verifier";
 import Config "../../Config";
 import ic_eth "canister:ic_eth";
 import Principal "mo:base/Principal";
+import Time "mo:base/Time";
 import CanDBIndex "canister:CanDBIndex";
 
 actor {
@@ -14,12 +15,13 @@ actor {
         personIdStoragePrincipal: ?Principal;
         ethereumAddress: Text;
     })
-        : async* { score: Float; personIdStoragePrincipal: Principal; personStoragePrincipal: Principal }
+        : async* { score: Float; time: Time.Time; personIdStoragePrincipal: Principal; personStoragePrincipal: Principal }
     {
         let score = V.extractItemScoreFromBody(body);
+        let time = V.extractTimeFromBody(body);
         let { personIdStoragePrincipal = idPrincipalNew; personStoragePrincipal = principalNew } =
-            await CanDBIndex.storePersonhood({personPrincipal; personStoragePrincipal; personIdStoragePrincipal; score; ethereumAddress});
-        { score; personIdStoragePrincipal = idPrincipalNew; personStoragePrincipal = principalNew };
+            await CanDBIndex.storePersonhood({personPrincipal; personStoragePrincipal; personIdStoragePrincipal; score; time; ethereumAddress});
+        { score; time; personIdStoragePrincipal = idPrincipalNew; personStoragePrincipal = principalNew };
     };
 
     public shared({caller}) func scoreBySignedEthereumAddress({
@@ -31,7 +33,8 @@ actor {
     }): async {
         personIdStoragePrincipal: Principal;
         personStoragePrincipal: Principal;
-        score: Float
+        score: Float;
+        time: Time.Time;
     } {
         // A real app would store the verified address somewhere instead of just returning the score to frontend.
         // Use `extractItemScoreFromBody` or `extractItemScoreFromJSON` to extract score.
