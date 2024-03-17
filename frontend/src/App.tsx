@@ -141,7 +141,7 @@ function AppInternal2({agent, isAuthenticated, principal, login, logout}: {
       const part = createCanDBPartitionActor(storagePrincipal, {agent: agent});
       part.getPersonhood({sk: principal.toText()}).then(user => {
         setScore(user.personhoodScore);
-        setTime(user.personhoodDate);
+        setTime(parseFloat(user.personhoodDate.toString()));
       });
     }
   }, [principal, agent]);

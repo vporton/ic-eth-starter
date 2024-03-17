@@ -18,7 +18,7 @@ actor {
         : async* { score: Float; time: Time.Time; personIdStoragePrincipal: Principal; personStoragePrincipal: Principal }
     {
         let score = V.extractItemScoreFromBody(body);
-        let time = V.extractTimeFromBody(body);
+        let time = V.extractDateFromBody(body);
         let { personIdStoragePrincipal = idPrincipalNew; personStoragePrincipal = principalNew } =
             await CanDBIndex.storePersonhood({personPrincipal; personStoragePrincipal; personIdStoragePrincipal; score; time; ethereumAddress});
         { score; time; personIdStoragePrincipal = idPrincipalNew; personStoragePrincipal = principalNew };
@@ -58,7 +58,8 @@ actor {
     }): async {
         personIdStoragePrincipal: Principal;
         personStoragePrincipal: Principal;
-        score : Float
+        score: Float;
+        time: Time.Time;
     } {
         // A real app would store the verified address somewhere instead of just returning the score to frontend.
         // Use `extractItemScoreFromBody` or `extractItemScoreFromJSON` to extract score.

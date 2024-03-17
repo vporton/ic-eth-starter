@@ -203,7 +203,7 @@ module {
         let ?json = JSON.parse(body) else {
             Debug.trap("Passport response is not JSON");
         };
-        extractItemScoreFromJSON(json);
+        extractDateFromJSON(json);
     };
 
     public func extractDateFromJSON(json: JSON.JSON): Time.Time {
@@ -215,7 +215,10 @@ module {
                 let #String time = e.1 else {
                     Debug.trap("Wrong JSON format");
                 };
-                return Date.Date.fromIsoFormat(time);
+                let #ok time2 = Date.Date.fromIsoFormat(time) else {
+                    Debug.trap("Wrong JSON format");
+                };
+                return Date.Date.toTime(time2);
             }
         };
         Debug.trap("No score");
