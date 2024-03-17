@@ -1,6 +1,7 @@
 import Time "mo:base/Time";
 import Principal "mo:base/Principal";
 import Debug "mo:base/Debug";
+import Float "mo:base/Float";
 import E "mo:candb/Entity";
 
 module {
@@ -26,7 +27,6 @@ module {
       #text(user.personhoodEthereumAddress),
     ]);
   };
-
 
   public func deserializeUser(attr: E.AttributeValue): User {
     var principal = Principal.fromText("2vxsx-fae");
@@ -89,5 +89,13 @@ module {
     personIdSubkey: E.AttributeKey;
     personPrincipalPrefix: Text;
     personPrincipalSubkey: E.AttributeKey;
+  };
+
+  /// Every ~3 months add to user's score in order for intruders, that may create
+  /// duplicate accounts, have no more votes than legit users.
+  public func adjustVotingPower(user: User): Float {
+    let passed = Time.now() - user.personhoodDate; // FIXME: Need the FIRST submit date.
+    let bonus = passed / (1_000_000_000 * 30*24*3600);
+    1.0 + Float.fromInt(bonus);
   };
 }
