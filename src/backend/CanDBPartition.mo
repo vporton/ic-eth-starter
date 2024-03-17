@@ -41,7 +41,7 @@ shared actor class CanDBPartition(options: {
   };
 
   // TODO: Why here is used `Multi`?
-  public shared({caller}) func putAttribute(options: { sk: Entity.SK; subkey: Entity.AttributeKey; value: Entity.AttributeValue }): async () {
+  public shared func putAttribute(options: { sk: Entity.SK; subkey: Entity.AttributeKey; value: Entity.AttributeValue }): async () {
     // In real software check access here.
     ignore await* Multi.replaceAttribute(db, options);
   };

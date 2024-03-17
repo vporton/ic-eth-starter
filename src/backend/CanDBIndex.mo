@@ -215,8 +215,8 @@ shared({caller = initialOwner}) actor class () = this {
     switch (oldIdV) {
       case (?(_, ?#text attr)) {
         if (attr != personPrincipalText) {
-          let personPrincipalCanister: CanDBPartition.CanDBPartition = actor(personPrincipalText);
-          switch (await* Multi.getAttributeByHint(pkToCanisterMap, pk, personPrincipalCanister, {
+          // let personPrincipalCanister: CanDBPartition.CanDBPartition = actor(personPrincipalText);
+          switch (await* Multi.getAttributeByHint(pkToCanisterMap, pk, personStoragePrincipal, {
               sk = storage.personPrincipalPrefix # personPrincipalText;
               subkey = storage.personPrincipalSubkey;
           })) {
@@ -228,13 +228,13 @@ shared({caller = initialOwner}) actor class () = this {
                 personhoodDate = 0;
                 personhoodEthereumAddress = oldUser.personhoodEthereumAddress;
               };
-              await* Multi.putAttributeNoDuplicates(
+              ignore await* Multi.putAttributeNoDuplicates(
                 map,
                 pk,
-                personPrincipalCanister
+                personStoragePrincipal,
                 {
                   sk = storage.personPrincipalPrefix # personPrincipalText;
-                  subkey = storage.personPrincipalSubkey};
+                  subkey = storage.personPrincipalSubkey;
                   value = lib.serializeUser(oldUserUpdated);
                 },
               );
@@ -270,11 +270,13 @@ shared({caller = initialOwner}) actor class () = this {
     { personIdStoragePrincipal = personIdResult; personStoragePrincipal = personPrincipalResult };
   };
 
-  public shared({caller}) func getAttributeByHint({
+  public shared func getAttributeByHint({
     pk: E.PK;
     hint: ?Principal;
     options: { sk: E.SK; subkey: E.AttributeKey };
-  }): async Text {
+  }): async ?(Principal, ?E.AttributeValue) {
+    // In real code you have authorization here.
+
     await* Multi.getAttributeByHint(pkToCanisterMap, pk, hint, options);
   };
 
