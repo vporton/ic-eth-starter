@@ -187,9 +187,16 @@ shared({caller = initialOwner}) actor class () = this {
 
   // Personhood //
 
-  public shared({caller}) func storePersonhood(hint: ?Principal, score: Float, ethereumAddress: Text)
-    : async { personIdPrincipal: Principal; personStoragePrincipal: Principal }
+  public shared({caller}) func storePersonhood({
+    personPrincipal: Principal;
+    personStoragePrincipal: ?Principal;
+    personIdStoragePrincipal: ?Principal;
+    score: Float;
+    ethereumAddress: Text;
+  }) : async { personIdStoragePrincipal: Principal; personStoragePrincipal: Principal }
   {
+    // In real code you have authorization here.
+
     let user = {
       principal = caller;
       personhoodScore = score;
@@ -200,9 +207,10 @@ shared({caller = initialOwner}) actor class () = this {
     await* DB.storePersonhood({
       map = pkToCanisterMap;
       pk = "user";
-      hint;
       personId = user.personhoodEthereumAddress;
-      personStoragePrincipal = user.principal;
+      personPrincipal;
+      personStoragePrincipal;
+      personIdStoragePrincipal;
       userInfo = userEntity;
       storage = lib.personStorage;
     });

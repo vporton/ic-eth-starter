@@ -7,16 +7,29 @@ import CanDBIndex "canister:CanDBIndex";
 
 actor {
     /// Called upon receipt of personhood from Gitcoin.
-    func processPersonhood(body: Text, hint: ?Principal, ethereumAddress: Text)
-        : async* { score: Float; personIdPrincipal: Principal; personStoragePrincipal: Principal }
+    func processPersonhood({
+        body: Text;
+        personPrincipal: Principal;
+        personStoragePrincipal: ?Principal;
+        personIdStoragePrincipal: ?Principal;
+        ethereumAddress: Text;
+    })
+        : async* { score: Float; personIdStoragePrincipal: Principal; personStoragePrincipal: Principal }
     {
         let score = V.extractItemScoreFromBody(body);
-        let { personIdPrincipal; personStoragePrincipal } = await CanDBIndex.storePersonhood(hint, score, ethereumAddress);
-        { score; personIdPrincipal; personStoragePrincipal };
+        let { personIdStoragePrincipal = idPrincipalNew; personStoragePrincipal = principalNew } =
+            await CanDBIndex.storePersonhood({personPrincipal; personStoragePrincipal; personIdStoragePrincipal; score; ethereumAddress});
+        { score; personIdStoragePrincipal = idPrincipalNew; personStoragePrincipal = principalNew };
     };
 
-    public shared func scoreBySignedEthereumAddress({address: Text; signature: Text; nonce: Text; oldHint: ?Principal}): async {
-        personIdPrincipal: Principal;
+    public shared({caller}) func scoreBySignedEthereumAddress({
+        address: Text;
+        signature: Text;
+        nonce: Text;
+        personStoragePrincipal: ?Principal;
+        personIdStoragePrincipal: ?Principal;
+    }): async {
+        personIdStoragePrincipal: Principal;
         personStoragePrincipal: Principal;
         score: Float
     } {
@@ -30,11 +43,17 @@ actor {
             transform = removeHTTPHeaders;
             config = Config.config;
         });
-        await* processPersonhood(body, oldHint, address);
+        await* processPersonhood({body; personPrincipal = caller; personStoragePrincipal; personIdStoragePrincipal; ethereumAddress = address});
     };
 
-    public shared func submitSignedEthereumAddressForScore({address: Text; signature: Text; nonce: Text; oldHint: ?Principal}): async {
-        personIdPrincipal: Principal;
+    public shared({caller}) func submitSignedEthereumAddressForScore({
+        address: Text;
+        signature: Text;
+        nonce: Text;
+        personStoragePrincipal: ?Principal;
+        personIdStoragePrincipal: ?Principal;
+    }): async {
+        personIdStoragePrincipal: Principal;
         personStoragePrincipal: Principal;
         score : Float
     } {
@@ -48,7 +67,7 @@ actor {
             transform = removeHTTPHeaders;
             config = Config.config;
         });
-        await* processPersonhood(body, oldHint, address);
+        await* processPersonhood({body; personPrincipal = caller; personStoragePrincipal; personIdStoragePrincipal; ethereumAddress = address});
     };
 
     public shared func getEthereumSigningMessage(): async {message: Text; nonce: Text} {

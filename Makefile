@@ -5,6 +5,7 @@ all: frontend
 
 .PHONY: backend
 backend: CanDBPartition.wasm
+#	dfx build internet_identity
 	dfx deploy backend
 	dfx generate backend
 	env -i scripts/read-env.sh

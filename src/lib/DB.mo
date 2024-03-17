@@ -2,6 +2,7 @@ import E "mo:candb/Entity";
 import CanisterMap "mo:candb/CanisterMap";
 import Multi "mo:candb-multi/Multi";
 import Principal "mo:base/Principal";
+import Debug "mo:base/Debug";
 
 module {
     /// Person ID for Gitcoin Passport is an Ethereum address
@@ -20,18 +21,19 @@ module {
     public func storePersonhood({
         map: CanisterMap.CanisterMap;
         pk: E.PK;
-        hint: ?Principal;
         personId: Text;
-        personStoragePrincipal: Principal;
+        personIdStoragePrincipal: ?Principal;
+        personPrincipal: Principal;
+        personStoragePrincipal: ?Principal;
         userInfo: E.AttributeValue;
         storage: PersonStorage;
-    }) : async* { personIdPrincipal: Principal; personStoragePrincipal: Principal } {
+    }) : async* { personIdStoragePrincipal: Principal; personStoragePrincipal: Principal } {
         // TODO: Order of the next two operations?
         // NoDuplicates, because it cannot be more than one personhood with a given address.
         let personIdResult = await* Multi.putAttributeNoDuplicates(
             map,
             pk,
-            hint,
+            personIdStoragePrincipal,
             {
                 sk = storage.personIdPrefix # personId;
                 subkey = storage.personIdSubkey;
@@ -39,16 +41,17 @@ module {
             },
         );
         // NoDuplicates, because there can't be more than one user with a given principal.
+        Debug.print("storePersonhood: sk = " # storage.personPrincipalPrefix # Principal.toText(personPrincipal)); // FIXME: Remove.
         let personPrincipalResult = await* Multi.putAttributeNoDuplicates(
             map,
             pk,
-            hint,
+            personStoragePrincipal,
             {
-                sk = storage.personPrincipalPrefix # Principal.toText(personStoragePrincipal);
+                sk = storage.personPrincipalPrefix # Principal.toText(personPrincipal);
                 subkey = storage.personPrincipalSubkey;
                 value = #text personId;
             },
         );
-        { personIdPrincipal = personIdResult; personStoragePrincipal = personPrincipalResult };
+        { personIdStoragePrincipal = personIdResult; personStoragePrincipal = personPrincipalResult };
     }
 }

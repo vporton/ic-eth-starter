@@ -17,7 +17,8 @@ import config from './config.json';
 import ourCanisters from './our-canisters.json';
 import { HttpAgent } from '@dfinity/agent';
 import { ClipLoader } from 'react-spinners';
-import { Principal } from '@dfinity/candid/lib/cjs/idl';
+import { AuthContext, AuthProvider, useAuth } from './use-auth-client'
+import { Principal } from '@dfinity/principal';
 
 const walletConnectOptions/*: WalletConnectOptions*/ = {
   projectId:
@@ -83,9 +84,28 @@ const onboard = init({
 // - connect: ask for signature, store the signature, try to retrieve, show retrieval status
 // - recalculate: recalculate, show retrieval status
 function App() {
-  const agent = useMemo(() => {
+  const identityCanister = process.env.CANISTER_ID_INTERNET_IDENTITY;
+  const identityProvider = process.env.REACT_APP_IS_LOCAL === '1' ? `http://${identityCanister}.localhost:4943` : `https://identity.ic0.app`;
+
+  return <AuthProvider options={{loginOptions: {
+    identityProvider,
+    maxTimeToLive: BigInt (7) * BigInt(24) * BigInt(3_600_000_000_000), // 1 week // TODO
+    windowOpenerFeatures: "toolbar=0,location=0,menubar=0,width=500,height=500,left=100,top=100",
+    onSuccess: () => {
+        console.log('Login Successful!');
+    },
+    onError: (error) => {
+        console.error('Login Failed: ', error);
+    }
+  }}}>
+    <AppInternal/>
+  </AuthProvider>
+}
+
+function AppInternal() {
+    const agent = useMemo(() => {
     const agent = new HttpAgent({});
-    if (config.IS_LOCAL) {
+    if (process.env.REACT_APP_IS_LOCAL === '1') {
       agent.fetchRootKey();
     }
     return agent;
@@ -104,9 +124,12 @@ function App() {
 
   useEffect(() => {
     const storagePrincipal = localStorage.getItem('person:storagePrincipal');
-    const part = createCanDBPartitionActor(storagePrincipal, {agent});
-    const user = part.getUser(principal);
-    setScore(user.personhoodScore);
+    if (storagePrincipal !== null && principal !== undefined) {
+      const part = createCanDBPartitionActor(storagePrincipal, {agent});
+      part.getPersonhood({sk: principal}).then(user => {
+        setScore(user.personhoodScore);
+      });
+    }
   });
 
   useEffect(() => {
@@ -124,7 +147,7 @@ function App() {
     }
   }, [wallet]);
 
-  async function storePerson({ personIdPrincipal, personStoragePrincipal, score }) {
+  async function storePerson({ personIdStoragePrincipal, personStoragePrincipal, score }) {
     // Scorer returns 0E-9 for zero.
     setScore(/^\d+(\.\d+)?$|^0E-9$/.test(score.toString()) ? Number(score) : 'retrieved-none');
     localStorage.setItem('person:storagePrincipal', personStoragePrincipal);
@@ -152,8 +175,13 @@ function App() {
           localSignature = signature;
           setSignature(localSignature);
         }
+        const storagePrincipal = localStorage.getItem('person:storagePrincipal');
         const res = await backend.scoreBySignedEthereumAddress({
-          address: address!, signature: localSignature!, nonce: localNonce!, oldHint: [],
+          address: address!,
+          signature: localSignature!,
+          nonce: localNonce!,
+          personStoragePrincipal: storagePrincipal ? [Principal.fromText(storagePrincipal)] : [],
+          personIdStoragePrincipal: [],
         });
         storePerson(res);
       }
@@ -173,8 +201,13 @@ function App() {
       setRecalculateScoreLoading(true);
       const backend = createBackendActor(ourCanisters.CANISTER_ID_BACKEND, {agent}); // TODO: duplicate code
       try {
+        const storagePrincipal = localStorage.getItem('person:storagePrincipal');
         const res = await backend.submitSignedEthereumAddressForScore({
-          address: address!, signature: signature!, nonce: nonce!, oldHint: [],
+          address: address!,
+          signature: signature!,
+          nonce: nonce!,
+          personStoragePrincipal: storagePrincipal ? [Principal.fromText(storagePrincipal)] : [],
+          personIdStoragePrincipal: [],
         });
         storePerson(res);
       }
@@ -189,54 +222,67 @@ function App() {
   }
 
   return (
-    <div className="App">
-      <Container>
-        <Row>
-          <h1>Example Identity App</h1>
-          <p>This is an example app for DFINITY Internet Computer, that connects to{' '}
-            <a target='_blank' href="https://passport.gitcoin.co" rel="noreferrer">Gitcoin Passport</a>{' '}
-            to prove user's personhood and uniqueness (for example, against so called <q>Sybil attack</q>, that is when
-            a user votes more than once).</p>
-          <p>The current version of this app requires use of an Ethereum wallet that you need
-            both in Gitcoin Passport and in this app. (So, in real Internet Computer apps
-            you will need two wallets: DFINITY Internet Computer wallet and Ethereum wallet.){' '}
-            You don't need to have any funds on your wallet to use this app (because you will use an Ethereum wallet{' '}
-            only to sign a message for this app, not for any transactions).
-            In the future <a target='_blank' href="https://portonvictor.org" rel="noreferrer">I</a> am going to
-            add DFINITY Internet Computer support to Gitcoin Passport, to avoid the need to create an Ethereum wallet
-            to verify personhood in apps like this.</p>
-          <h2>Steps</h2>
-          <ol>
-            <li>Go to <a target='_blank' href="https://passport.gitcoin.co" rel="noreferrer">Gitcoin Passport</a>{' '}
-              and prove your personhood.</li>
-            <li>Return to this app and<br/>
-              <Button disabled={connecting} onClick={() => (wallet ? disconnect(wallet) : connect())}>
-                {connecting ? 'connecting' : wallet ? 'Disconnect Ethereum' : 'Connect Ethereum'}
-              </Button>{' '}
-              with the same wallet, as one you used for Gitcoin Password.<br/>
-              Your wallet: {address ? <small>{address}</small> : 'not connected'}.
-            </li>
-            <li>Check the score<br/>
-              <Button disabled={!agent || !wallet} onClick={obtainScore}>Get you identity score</Button>
-              <ClipLoader loading={obtainScoreLoading}/>{' '}
-            </li>
-            <li>If needed,<br/>
-              <Button disabled={!address || !signature || !agent || !wallet || !nonce} onClick={recalculateScore}>
-                Recalculate your identity score
-              </Button>
-              <ClipLoader loading={recalculateScoreLoading}/>{' '}
-            </li>
-          </ol>
-          <p>Your identity score:{' '}
-            {score === 'didnt-read' ? 'Click the above button to check.'
-              : score === 'retrieved-none' ? 'Not yet calculated'
-              : `${score} ${typeof score == 'number' && score >= 20
-              ? '(Congratulations: You\'ve been verified.)'
-              : '(Sorry: It\'s <20, you are considered a bot.)'}`}
-          </p>
-        </Row>
-      </Container>
-    </div>
+    <AuthContext.Consumer>
+      {({isAuthenticated, principal, authClient, defaultAgent, options, login, logout}) => {
+      return <div className="App">
+        <Container>
+          <Row>
+            <h1>Example Identity App</h1>
+            <p>This is an example app for DFINITY Internet Computer, that connects to{' '}
+              <a target='_blank' href="https://passport.gitcoin.co" rel="noreferrer">Gitcoin Passport</a>{' '}
+              to prove user's personhood and uniqueness (for example, against so called <q>Sybil attack</q>, that is when
+              a user votes more than once).</p>
+            <p>The current version of this app requires use of an Ethereum wallet that you need
+              both in Gitcoin Passport and in this app. (So, in real Internet Computer apps
+              you will need two wallets: DFINITY Internet Computer wallet and Ethereum wallet.){' '}
+              You don't need to have any funds on your wallet to use this app (because you will use an Ethereum wallet{' '}
+              only to sign a message for this app, not for any transactions).
+              In the future <a target='_blank' href="https://portonvictor.org" rel="noreferrer">I</a> am going to
+              add DFINITY Internet Computer support to Gitcoin Passport, to avoid the need to create an Ethereum wallet
+              to verify personhood in apps like this.</p>
+            <h2>Steps</h2>
+            <ol>
+              <li>Go to <a target='_blank' href="https://passport.gitcoin.co" rel="noreferrer">Gitcoin Passport</a>{' '}
+                and prove your personhood.</li>
+              <li>Return to this app and<br/>
+                <Button disabled={connecting} onClick={() => (wallet ? disconnect(wallet) : connect())}>
+                  {connecting ? 'connecting' : wallet ? 'Disconnect Ethereum' : 'Connect Ethereum'}
+                </Button>{' '}
+                with the same wallet, as one you used for Gitcoin Password.<br/>
+                Your wallet: {address ? <small>{address}</small> : 'not connected'}.
+              </li>
+              <li>Also connect ICP identity<br/>
+                <Button onClick={() => (isAuthenticated ? logout!() : login!())}>
+                  {isAuthenticated ? 'Disconnect ICP' : 'Connect ICP'}
+                </Button><br/>
+                Your IC principal: {principal ? <small>{principal.toString()}</small> : 'not connected'}.
+              </li>
+              <li>Check the score<br/>
+                <Button disabled={!agent || !wallet || !isAuthenticated} onClick={obtainScore}>Get you identity score</Button>
+                <ClipLoader loading={obtainScoreLoading}/>{' '}
+              </li>
+              <li>If needed,<br/>
+                <Button
+                  disabled={!address || !signature || !agent || !wallet || !isAuthenticated || !nonce}
+                  onClick={recalculateScore}
+                >
+                  Recalculate your identity score
+                </Button>
+                <ClipLoader loading={recalculateScoreLoading}/>{' '}
+              </li>
+            </ol>
+            <p>Your identity score:{' '}
+              {score === 'didnt-read' ? 'Click the above button to check.'
+                : score === 'retrieved-none' ? 'Not yet calculated'
+                : `${score} ${typeof score == 'number' && score >= 20
+                ? '(Congratulations: You\'ve been verified.)'
+                : '(Sorry: It\'s <20, you are considered a bot.)'}`}
+            </p>
+          </Row>
+        </Container>
+      </div>
+      }}
+    </AuthContext.Consumer>
   );
 }
 
