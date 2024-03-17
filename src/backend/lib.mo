@@ -16,6 +16,7 @@ module {
     principal: Principal;
     personhoodScore: Float;
     personhoodDate: Time.Time;
+    firstPersonhoodDate: Time.Time;
     personhoodEthereumAddress: Text;
   };
 
@@ -24,6 +25,7 @@ module {
       #text(Principal.toText(user.principal)),
       #float(user.personhoodScore),
       #int(user.personhoodDate),
+      #int(user.firstPersonhoodDate),
       #text(user.personhoodEthereumAddress),
     ]);
   };
@@ -33,6 +35,7 @@ module {
     var score = 0.0;
     var pos = 0;
     var date = +0;
+    var firstDate = +0;
     var address = "";
     let res = label r: Bool {
       switch (attr) {
@@ -59,6 +62,13 @@ module {
             case _ { break r false; };
           };
           switch (attr[pos]) {
+            case (#int v) {
+              firstDate := v;
+              pos += 1;
+            };
+            case _ { break r false; };
+          };
+          switch (attr[pos]) {
             case (#text v) {
               address := v;
               pos += 1;
@@ -77,6 +87,7 @@ module {
       principal;
       personhoodScore = score;
       personhoodDate = date;
+      firstPersonhoodDate = firstDate;
       personhoodEthereumAddress = address;
     };
   };
@@ -94,7 +105,7 @@ module {
   /// Every ~3 months add to user's score in order for intruders, that may create
   /// duplicate accounts, have no more votes than legit users.
   public func adjustVotingPower(user: User): Float {
-    let passed = Time.now() - user.personhoodDate; // FIXME: Need the FIRST submit date.
+    let passed = Time.now() - user.firstPersonhoodDate;
     let bonus = passed / (1_000_000_000 * 30*24*3600);
     1.0 + Float.fromInt(bonus);
   };
