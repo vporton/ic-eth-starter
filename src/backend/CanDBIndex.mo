@@ -292,10 +292,24 @@ shared({caller = initialOwner}) actor class () = this {
   {
     // In real code you have authorization here.
 
+    let oldUser = getAttributeByHint(pkToCanisterMap, pk, personStoragePrincipal, {
+      sk = lib.personhoodStorage.personPrincipalPrefix # Principal.toText(personPrincipal);
+      subkey = lib.personhoodStorage.personPrincipalSubkey;
+    });
+    let firstDate = switch (oldUser) {
+      case (?oldUser) {
+        switch (oldUser.firstPersonhoodDate) {
+          case (?firstDate) { firstDate };
+          case null { 0 };
+        };
+      };
+      case null { 0 };
+    };
     let user = {
       principal = caller;
       personhoodScore = score;
       personhoodDate = time;
+      firstPersonhoodDate = firstDate;
       personhoodEthereumAddress = ethereumAddress;
     };
     let userEntity = lib.serializeUser(user);
