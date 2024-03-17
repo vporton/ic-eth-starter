@@ -1,17 +1,24 @@
 [package]
 name = "passport-client"
-version = "0.4.1"
+version = "0.4.2"
 description = "Use Gitcoin Passport anti-Sybil information"
 repository = "https://github.com/vporton/passport-client-dfinity"
-keywords = [ "Gitcoin passport", "anti-Sybil", "antisybil", "sybil", "authorization" ]
+keywords = [
+  "Gitcoin passport",
+  "anti-Sybil",
+  "antisybil",
+  "sybil",
+  "authorization"
+]
 license = "MIT"
 
 [dependencies]
 base = "0.11.0"
-sequence = "https://github.com/matthewhammer/motoko-sequence#366c419"
+sequence = "https://github.com/matthewhammer/motoko-sequence#366c419@366c419@366c4191d856ed4842267f5ab89d7222ed2d71d0"
 "json.mo" = "https://github.com/aviate-labs/json.mo#master@afd30ed75095cb339c1ec187d61030bbd2e59ae6"
 candb = "1.0.7"
 candb-multi = "0.11.0"
 stable-buffer = "1.0.1"
 StableBuffer = "https://github.com/skilesare/StableBuffer#v0.2.0@110660769d11ba93c618dc4712525d20503bdc37"
 "date.mo" = "https://github.com/aviate-labs/date.mo#master@cfe51ad7d8a576d53e701136d4234233b94970eb"
+motoko-sequence = "https://github.com/matthewhammer/motoko-sequence#366c419@366c4191d856ed4842267f5ab89d7222ed2d71d0"
