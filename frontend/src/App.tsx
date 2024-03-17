@@ -129,7 +129,7 @@ function AppInternal2({agent, isAuthenticated, principal, login, logout}: {
   const [nonce, setNonce] = useState<string>();
   const [address, setAddress] = useState<string>();
   const [score, setScore] = useState<number | 'didnt-read' | 'retrieved-none'>('didnt-read');
-  const [time, setTime] = useState<number | undefined>(undefined);
+  const [time, setTime] = useState<BigInt | undefined>(undefined);
   const [obtainScoreLoading, setObtainScoreLoading] = useState(false);
   const [recalculateScoreLoading, setRecalculateScoreLoading] = useState(false);
 
@@ -141,7 +141,7 @@ function AppInternal2({agent, isAuthenticated, principal, login, logout}: {
       const part = createCanDBPartitionActor(storagePrincipal, {agent: agent});
       part.getPersonhood({sk: principal.toText()}).then(user => {
         setScore(user.personhoodScore);
-        setTime(parseFloat(user.personhoodDate.toString()));
+        setTime(user.personhoodDate);
       });
     }
   }, [principal, agent]);
@@ -290,7 +290,7 @@ function AppInternal2({agent, isAuthenticated, principal, login, logout}: {
             ? '(Congratulations: You\'ve been verified.)'
             : '(Sorry: It\'s <20, you are considered a bot.)'}`}
         </p>
-        <p>Your score time: {time ? (new Date(time/1000000)).toISOString() : '(none)'}</p>
+        <p>Your score time: {time ? (new Date(Number(time)/1000000)).toISOString() : '(none)'}</p>
       </Row>
     </Container>
   </div>;
