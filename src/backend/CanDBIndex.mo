@@ -282,6 +282,7 @@ shared({caller = initialOwner}) actor class () = this {
   };
 
   public shared({caller}) func storePersonhood({
+    pk: E.PK;
     personPrincipal: Principal;
     personStoragePrincipal: ?Principal;
     personIdStoragePrincipal: ?Principal;
@@ -292,18 +293,15 @@ shared({caller = initialOwner}) actor class () = this {
   {
     // In real code you have authorization here.
 
-    let oldUser = getAttributeByHint(pkToCanisterMap, pk, personStoragePrincipal, {
-      sk = lib.personhoodStorage.personPrincipalPrefix # Principal.toText(personPrincipal);
-      subkey = lib.personhoodStorage.personPrincipalSubkey;
+    let oldUser = await* Multi.getAttributeByHint(pkToCanisterMap, pk, personStoragePrincipal, {
+      sk = lib.personStorage.personPrincipalPrefix # Principal.toText(personPrincipal);
+      subkey = lib.personStorage.personPrincipalSubkey;
     });
     let firstDate = switch (oldUser) {
-      case (?oldUser) {
-        switch (oldUser.firstPersonhoodDate) {
-          case (?firstDate) { firstDate };
-          case null { 0 };
-        };
+      case (?(oldUser, ?v)) {
+        lib.deserializeUser(v).firstPersonhoodDate;
       };
-      case null { 0 };
+      case _ { 0 };
     };
     let user = {
       principal = caller;
