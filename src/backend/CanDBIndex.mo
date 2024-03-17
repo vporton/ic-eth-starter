@@ -303,11 +303,30 @@ shared({caller = initialOwner}) actor class () = this {
       };
       case _ { 0 };
     };
-    let user = {
+    let oldUserUpdated = {
       principal = caller;
       personhoodScore = score;
       personhoodDate = time;
       firstPersonhoodDate = firstDate;
+      personhoodEthereumAddress = ethereumAddress;
+    };
+    let oldUserEntity = lib.serializeUser(oldUserUpdated);
+    switch (personStoragePrincipal) {
+      case (?personStoragePrincipal) {
+        let part: CanDBPartition.CanDBPartition = actor(Principal.toText(personStoragePrincipal));
+        await part.putAttribute({
+          sk = lib.personStorage.personPrincipalPrefix # Principal.toText(personPrincipal);
+          value = oldUserEntity;
+          subkey = lib.personStorage.personPrincipalSubkey;
+        });
+      };
+      case null {};
+    };
+    let user = {
+      principal = caller;
+      personhoodScore = score;
+      personhoodDate = time;
+      firstPersonhoodDate = if (firstDate == 0) { time } else { firstDate };
       personhoodEthereumAddress = ethereumAddress;
     };
     let userEntity = lib.serializeUser(user);
