@@ -226,6 +226,7 @@ shared({caller = initialOwner}) actor class () = this {
                 principal = oldUser.principal;
                 personhoodScore = 0.0;
                 personhoodDate = 0;
+                firstPersonhoodDate = oldUser.firstPersonhoodDate;
                 personhoodEthereumAddress = oldUser.personhoodEthereumAddress;
               };
               ignore await* Multi.putAttributeNoDuplicates(
