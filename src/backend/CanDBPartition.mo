@@ -8,7 +8,6 @@ import Debug "mo:base/Debug";
 import Multi "mo:candb-multi/Multi";
 import RBT "mo:stable-rbtree/StableRBTree";
 import lib "lib";
-
 shared actor class CanDBPartition(options: {
   partitionKey: Text;
   scalingOptions: CanDB.ScalingOptions;

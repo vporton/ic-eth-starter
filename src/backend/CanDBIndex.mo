@@ -187,6 +187,14 @@ shared({caller = initialOwner}) actor class () = this {
 
   // Personhood //
 
+  public shared({caller}) func getAttributeByHint({
+    pk: E.PrimaryKey;
+    hint: ?Principal;
+    options: { sk: E.SK; subkey: E.AttributeKey };
+  }): async Text {
+    await* Multi.getAttributeByHint(pkToCanisterMap, pk, hint, options);
+  };
+
   public shared({caller}) func storePersonhood({
     personPrincipal: Principal;
     personStoragePrincipal: ?Principal;
