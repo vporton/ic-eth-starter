@@ -215,8 +215,15 @@ module {
                 let #String time = e.1 else {
                     Debug.trap("Wrong JSON format");
                 };
-                let #ok time2 = Date.Date.fromIsoFormat(time) else {
-                    Debug.trap("Wrong JSON format");
+                Debug.print("time=" # time); // FIXME: Remove.
+                let time1 = Text.replace(time, #text "+00:00", "Z"); // bug workaround?
+                let time2 = switch (Date.Date.fromIsoFormat(time1)) {
+                    case (#ok time) {
+                        time;
+                    };
+                    case (#err msg) {
+                        Debug.trap(msg);
+                    };
                 };
                 return Date.Date.toTime(time2);
             }

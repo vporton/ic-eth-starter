@@ -290,7 +290,7 @@ function AppInternal2({agent, isAuthenticated, principal, login, logout}: {
             ? '(Congratulations: You\'ve been verified.)'
             : '(Sorry: It\'s <20, you are considered a bot.)'}`}
         </p>
-        <p>Your score time: {time}</p>
+        <p>Your score time: {time ? (new Date(time/1000000)).toISOString() : '(none)'}</p>
       </Row>
     </Container>
   </div>;
