@@ -267,7 +267,7 @@ function AppInternal2({agent, isAuthenticated, principal, login, logout}: {
             <Button onClick={() => (isAuthenticated ? logout!() : login!())}>
               {isAuthenticated ? 'Disconnect ICP' : 'Connect ICP'}
             </Button><br/>
-            Your IC principal: {principal ? <small>{principal.toString()}</small> : 'not connected'}.
+            Your IC principal: {isAuthenticated && principal?.toString() !== "2vxsx-fae" ? <small>{principal!.toString()}</small> : 'not connected'}.
           </li>
           <li>Check the score<br/>
             <Button disabled={!agent || !wallet || !isAuthenticated} onClick={obtainScore}>Get you identity score</Button>
