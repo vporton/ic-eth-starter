@@ -20,7 +20,7 @@ actor {
         let score = V.extractItemScoreFromBody(body);
         let time = V.extractDateFromBody(body);
         let { personIdStoragePrincipal = idPrincipalNew; personStoragePrincipal = principalNew } =
-            await CanDBIndex.storePersonhood({personPrincipal; personStoragePrincipal; personIdStoragePrincipal; score; time; ethereumAddress});
+            await CanDBIndex.storePersonhood({pk = "user"; personPrincipal; personStoragePrincipal; personIdStoragePrincipal; score; time; ethereumAddress});
         { score; time; personIdStoragePrincipal = idPrincipalNew; personStoragePrincipal = principalNew };
     };
 
