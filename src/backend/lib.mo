@@ -80,4 +80,14 @@ module {
       personhoodEthereumAddress = address;
     };
   };
+
+  /// Person ID for Gitcoin Passport is an Ethereum address
+  public type PersonId = Text;
+
+  public type PersonStorage = {
+    personIdPrefix: Text;
+    personIdSubkey: E.AttributeKey;
+    personPrincipalPrefix: Text;
+    personPrincipalSubkey: E.AttributeKey;
+  };
 }

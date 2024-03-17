@@ -2,6 +2,7 @@ import Cycles "mo:base/ExperimentalCycles";
 import Debug "mo:base/Debug";
 import Text "mo:base/Text";
 import CA "mo:candb/CanisterActions";
+import E "mo:candb/Entity";
 import Utils "mo:candb/Utils";
 import CanisterMap "mo:candb/CanisterMap";
 import Buffer "mo:StableBuffer/StableBuffer";
@@ -9,7 +10,7 @@ import CanDBPartition "CanDBPartition";
 import Admin "mo:candb/CanDBAdmin";
 import Principal "mo:base/Principal";
 import Time "mo:base/Time";
-import DB "../lib/DB";
+import Multi "mo:candb-multi/Multi";
 import lib "lib";
 
 shared({caller = initialOwner}) actor class () = this {
@@ -187,8 +188,90 @@ shared({caller = initialOwner}) actor class () = this {
 
   // Personhood //
 
+  /// Stores user info (normally, user's principal and identity score) in the DB.
+  /// The user is identified by `personId` (Ethereum address for Gitcoin Passport).
+  /// This function ensures that no duplicate persons are created.
+  func _storePersonhood({
+    map: CanisterMap.CanisterMap;
+    pk: E.PK;
+    personId: Text;
+    personPrincipal: Principal;
+    personIdStoragePrincipal: ?Principal;
+    personStoragePrincipal: ?Principal;
+    userInfo: E.AttributeValue;
+    storage: lib.PersonStorage;
+  }) : async* { personIdStoragePrincipal: Principal; personStoragePrincipal: Principal } {
+    // TODO: Order of the next two operations?
+    // NoDuplicates, because it cannot be more than one personhood with a given address.
+    let oldIdV = await* Multi.getAttributeByHint(
+      map,
+      pk,
+      personIdStoragePrincipal,
+      { sk = storage.personIdPrefix # personId; subkey = storage.personIdSubkey }
+    );
+    let personPrincipalText = Principal.toText(personPrincipal);
+
+    // Nullify the previous Ethereum address:
+    switch (oldIdV) {
+      case (?(_, ?#text attr)) {
+        if (attr != personPrincipalText) {
+          let personPrincipalCanister: CanDBPartition.CanDBPartition = actor(personPrincipalText);
+          switch (await* Multi.getAttributeByHint(pkToCanisterMap, pk, personPrincipalCanister, {
+              sk = storage.personPrincipalPrefix # personPrincipalText;
+              subkey = storage.personPrincipalSubkey;
+          })) {
+            case (?(_, ?oldUserInfo)) {
+              var oldUser = lib.deserializeUser(oldUserInfo);
+              let oldUserUpdated = {
+                principal = oldUser.principal;
+                personhoodScore = 0.0;
+                personhoodDate = 0;
+                personhoodEthereumAddress = oldUser.personhoodEthereumAddress;
+              };
+              await* Multi.putAttributeNoDuplicates(
+                map,
+                pk,
+                personPrincipalCanister
+                {
+                  sk = storage.personPrincipalPrefix # personPrincipalText;
+                  subkey = storage.personPrincipalSubkey};
+                  value = lib.serializeUser(oldUserUpdated);
+                },
+              );
+            };
+            case _ {};
+          };
+        };
+      };
+      case _ {};
+    };
+
+    let personIdResult = await* Multi.putAttributeNoDuplicates(
+      map,
+      pk,
+      personIdStoragePrincipal,
+      {
+        sk = storage.personIdPrefix # personId;
+        subkey = storage.personIdSubkey;
+        value = #text(personPrincipalText);
+      },
+    );
+    // NoDuplicates, because there can't be more than one user with a given principal.
+    let personPrincipalResult = await* Multi.putAttributeNoDuplicates(
+      map,
+      pk,
+      personStoragePrincipal,
+      {
+        sk = storage.personPrincipalPrefix # personPrincipalText;
+        subkey = storage.personPrincipalSubkey;
+        value = userInfo;
+      },
+    );
+    { personIdStoragePrincipal = personIdResult; personStoragePrincipal = personPrincipalResult };
+  };
+
   public shared({caller}) func getAttributeByHint({
-    pk: E.PrimaryKey;
+    pk: E.PK;
     hint: ?Principal;
     options: { sk: E.SK; subkey: E.AttributeKey };
   }): async Text {
@@ -213,7 +296,7 @@ shared({caller = initialOwner}) actor class () = this {
       personhoodEthereumAddress = ethereumAddress;
     };
     let userEntity = lib.serializeUser(user);
-    await* DB.storePersonhood({
+    await* _storePersonhood({
       map = pkToCanisterMap;
       pk = "user";
       personId = user.personhoodEthereumAddress;
