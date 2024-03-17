@@ -37,7 +37,7 @@ module {
             {
                 sk = storage.personIdPrefix # personId;
                 subkey = storage.personIdSubkey;
-                value = userInfo;
+                value = #text(Principal.toText(personPrincipal));
             },
         );
         // NoDuplicates, because there can't be more than one user with a given principal.
@@ -49,7 +49,7 @@ module {
             {
                 sk = storage.personPrincipalPrefix # Principal.toText(personPrincipal);
                 subkey = storage.personPrincipalSubkey;
-                value = #text personId;
+                value = userInfo;
             },
         );
         { personIdStoragePrincipal = personIdResult; personStoragePrincipal = personPrincipalResult };

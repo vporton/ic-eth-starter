@@ -59,13 +59,14 @@ shared actor class CanDBPartition(options: {
     return await CA.transferCycles(caller);
   };
 
+  // TODO: Rename `sk` argument.
   public query func getPersonhood(options: CanDB.GetOptions): async lib.User { 
     let sk = lib.personStorage.personPrincipalPrefix # options.sk;
-    let ?v = CanDB.get(db, {sk = lib.personStorage.personPrincipalPrefix # sk}) else {
+    let ?v = CanDB.get(db, {sk}) else {
       Debug.trap("no such user");
     };
     let ?v2 = RBT.get(v.attributes, Text.compare, lib.personStorage.personPrincipalSubkey) else {
-      Debug.trap("no such user");
+      Debug.trap("no such attribute");
     };
     lib.deserializeUser(v2);
   };

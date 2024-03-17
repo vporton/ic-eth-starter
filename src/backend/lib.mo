@@ -29,7 +29,7 @@ module {
 
 
   public func deserializeUser(attr: E.AttributeValue): User {
-    var principal = Principal.fromText("");
+    var principal = Principal.fromText("2vxsx-fae");
     var score = 0.0;
     var pos = 0;
     var date = +0;
