@@ -16,6 +16,7 @@ node_modules/
 /local
 
 # misc
+*.wasm
 .DS_Store
 /.env
 config.json
