@@ -1,3 +1,11 @@
+[package]
+name = "passport-client"
+version = "0.4.1"
+description = "Use Gitcoin Passport anti-Sybil information"
+repository = "https://github.com/vporton/passport-client-dfinity"
+keywords = [ "Gitcoin passport", "anti-Sybil", "antisybil", "sybil", "authorization" ]
+license = "MIT"
+
 [dependencies]
 base = "0.11.0"
 sequence = "https://github.com/matthewhammer/motoko-sequence#366c419"
