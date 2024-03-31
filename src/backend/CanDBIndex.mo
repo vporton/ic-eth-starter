@@ -282,12 +282,19 @@ shared({caller = initialOwner}) actor class () = this {
   };
 
   public shared({caller}) func storePersonhood({
+    /// PK for personhood data.
     pk: E.PK;
+    /// The IC principal to which the user is bound.
     personPrincipal: Principal;
+    /// The hint of canister where `User` data should be stored (under `personPrincipal` as the SK).
     personStoragePrincipal: ?Principal;
+    /// The hint of canister where mapping from the Ethereum address to the principal should be stored (under `ethereumAddress` as the SK).
     personIdStoragePrincipal: ?Principal;
+    /// Personhood score.
     score: Float;
+    /// The time of personhood score.
     time: Time.Time;
+    /// The Ethereum address of the person.
     ethereumAddress: Text;
   }) : async { personIdStoragePrincipal: Principal; personStoragePrincipal: Principal }
   {

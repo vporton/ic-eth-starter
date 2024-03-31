@@ -7,18 +7,33 @@ import Time "mo:base/Time";
 import CanDBIndex "canister:CanDBIndex";
 
 actor {
-    /// Called upon receipt of personhood from Gitcoin.
+    /// Called upon receipt of personhood from Gitcoin, to store personhood information in the CanDB DB.
     func processPersonhood({
         body: Text;
+        /// The principal of the person.
         personPrincipal: Principal;
+        /// The hint principal of the canister where to store `User` (identified by `personPrincipal`).
         personStoragePrincipal: ?Principal;
+        /// The hint principal pf the canister where to store mapping from `ethereumAddress` to person principal.
         personIdStoragePrincipal: ?Principal;
+        /// The Ethereum address of the user.
         ethereumAddress: Text;
     })
-        : async* { score: Float; time: Time.Time; personIdStoragePrincipal: Principal; personStoragePrincipal: Principal }
+        : async* {
+            /// Retrieved identity score.
+            score: Float;
+            /// Time at which the identity score was set at.
+            time: Time.Time;
+            /// The (possibly changed) canister where mapping from the Ethereum address to the principal will be stored (under `ethereumAddress` as the SK).
+            personIdStoragePrincipal: Principal;
+            /// The (possibly changed) canister where `User` data will be stored (under `personPrincipal` as the SK).
+            personStoragePrincipal: Principal;
+        }
     {
+        // Extract Gitcoin personhood score and score time.
         let score = V.extractItemScoreFromBody(body);
         let time = V.extractDateFromBody(body);
+        // Store personhood data in an anti-Sybil DB:
         let { personIdStoragePrincipal = idPrincipalNew; personStoragePrincipal = principalNew } =
             await CanDBIndex.storePersonhood({pk = "user"; personPrincipal; personStoragePrincipal; personIdStoragePrincipal; score; time; ethereumAddress});
         { score; time; personIdStoragePrincipal = idPrincipalNew; personStoragePrincipal = principalNew };
