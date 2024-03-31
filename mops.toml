@@ -1,6 +1,6 @@
 [package]
 name = "passport-client"
-version = "0.4.4"
+version = "0.4.6"
 description = "Use Gitcoin Passport anti-Sybil information"
 repository = "https://github.com/vporton/passport-client-dfinity"
 keywords = [
