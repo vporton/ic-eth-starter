@@ -244,9 +244,8 @@ function AppInternal2({agent, isAuthenticated, principal, login, logout}: {
           <a target='_blank' href="https://passport.gitcoin.co" rel="noreferrer">Gitcoin Passport</a>{' '}
           to prove user's personhood and uniqueness (for example, against so called <q>Sybil attack</q>, that is when
           a user votes more than once).</p>
-        <p>The current version of this app requires use of an Ethereum wallet that you need
-          both in Gitcoin Passport and in this app. (So, in real Internet Computer apps
-          you will need two wallets: DFINITY Internet Computer wallet and Ethereum wallet.){' '}
+        <p>The app requires use of both Internet Identity and an Ethereum wallet that you need
+          both in Gitcoin Passport and in this app.{' '}
           You don't need to have any funds on your wallet to use this app (because you will use an Ethereum wallet{' '}
           only to sign a message for this app, not for any transactions).
           In the future <a target='_blank' href="https://portonvictor.org" rel="noreferrer">I</a> am going to
