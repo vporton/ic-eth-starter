@@ -46,6 +46,11 @@ shared actor class CanDBPartition(options: {
     ignore await* Multi.replaceAttribute(db, options);
   };
 
+  public query func getAttribute(options: { sk: Entity.SK; subkey: Entity.AttributeKey }): async ?E.AttributeValue {
+    let v = CanDB.get(db, options);
+    do ? { RBT.get(v!.attributes, Text.compare, options.subkey)! };
+  };
+
   public shared func delete(options: CanDB.DeleteOptions): async () {
     // In real software check access here.
 
