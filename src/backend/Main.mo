@@ -51,7 +51,6 @@ actor {
         score: Float;
         time: Time.Time;
     } {
-        // A real app would store the verified address somewhere instead of just returning the score to frontend.
         // Use `extractItemScoreFromBody` or `extractItemScoreFromJSON` to extract score.
         let body = await* V.scoreBySignedEthereumAddress({
             ic_eth;
@@ -76,7 +75,6 @@ actor {
         score: Float;
         time: Time.Time;
     } {
-        // A real app would store the verified address somewhere instead of just returning the score to frontend.
         // Use `extractItemScoreFromBody` or `extractItemScoreFromJSON` to extract score.
         let body = await* V.submitSignedEthereumAddressForScore({
             ic_eth;
