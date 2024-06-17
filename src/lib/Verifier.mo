@@ -11,7 +11,7 @@ import Int64 "mo:base/Int64";
 import Nat64 "mo:base/Nat64";
 import Time "mo:base/Time";
 import Types "./Types";
-import JSON "mo:json.mo";
+import JSON "mo:json.mo/JSON";
 import Date "mo:date.mo/Date";
 
 module {
