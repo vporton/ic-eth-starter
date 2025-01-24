@@ -28,7 +28,7 @@
     "@types/bootstrap": "^5.2.10",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.70",
-    "@types/react": "^18.2.47",
+    "@types/react": "^18.3.16",
     "@types/react-bootstrap": "^0.32.35",
     "@types/react-dom": "^18.2.18",
     "@web3-onboard/core": "^2.21.2",
